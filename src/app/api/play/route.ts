@@ -1,93 +1,144 @@
 import { NextRequest } from "next/server";
-import { exec } from "child_process";
-import { Buffer } from "buffer";
+import { spawn } from "child_process";
 import YouTube from "youtube-sr";
 
-export async function GET(req: NextRequest) {
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+const CONTENT_TYPE_JSON = "application/json";
+const CONTENT_TYPE_MP3 = "audio/mp3";
 
-    if (!id) {
-      return new Response(JSON.stringify({ error: "Missing required parameter: id" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+// Enhanced yt-dlp options for faster processing
+const YT_DLP_FLAGS = [
+  '-f', 'bestaudio[ext=m4a]/bestaudio',
+  '--extract-audio',
+  '--audio-format', 'mp3',
+  '--audio-quality', '0',  // Best quality for faster processing
+  '--no-playlist',         // Disable playlist processing
+  '--no-warnings',  
+  '--quiet',
+  '--no-progress',  
+  '--no-colors',
+  '-o', '-'               // Output to stdout
+];
+
+const createErrorResponse = (message: string, status: number): Response => 
+  new Response(
+    JSON.stringify({ error: message }),
+    { status, headers: { "Content-Type": CONTENT_TYPE_JSON } }
+  );
+
+const streamAudio = async (videoUrl: string, title: string): Promise<Response> => {
+  const { readable, writable } = new TransformStream({
+    transform(chunk, controller) {
+      controller.enqueue(chunk);
+    },
+    flush(controller) {
+      controller.terminate();
     }
+  });
 
-    const videoUrl = `https://www.youtube.com/watch?v=${id}`;
-    const songTitle = (await YouTube.getVideo(videoUrl)).title as string
-    const title = songTitle.split(' ').slice(0,3).join(' ')
+  let hasError = false;
 
-    // Execute yt-dlp command to fetch audio as MP3
-    const command = `yt-dlp -f bestaudio --extract-audio --audio-format mp3 -o - ${videoUrl}`;
+  // Spawn yt-dlp with optimized flags
+  const process = spawn('yt-dlp', [...YT_DLP_FLAGS, videoUrl], {
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
 
-    return new Promise((resolve, reject) => {
-      const process = exec(command, { encoding: "buffer", maxBuffer: 1024 * 1024 * 100 });
-
-      // Explicitly type audioChunks as Buffer[]
-      const audioChunks: Buffer[] = [];
-
-      process.stdout?.on("data", (chunk) => {
-        audioChunks.push(chunk); // Chunk is of type Buffer
-      });
-
-      process.stdout?.on("end", () => {
-        // Once all chunks are collected, create a Blob
-        const audioBuffer = Buffer.concat(audioChunks);
-        const blob = new Blob([audioBuffer], { type: "audio/mp3" });
-
-        // Resolve the response with the Blob
-        resolve(
-          new Response(blob.stream(), {
-            headers: {
-              "Content-Type": "audio/mp3",
-              "Content-Disposition": `attachment; filename="${title}.mp3"`,
-              "Song-Title" : `${title}`
-            },
-          })
-        );
-      });
-
-      process.stdout?.on("error", (err) => {
-        console.error("Error from yt-dlp stdout:", err);
-        reject(
-          new Response(JSON.stringify({ error: "Internal server error" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          })
-        );
-      });
-
-      process.on("close", (code) => {
-        if (code !== 0) {
-          reject(
-            new Response(
-              JSON.stringify({ error: "yt-dlp exited with error." }),
-              {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-              }
-            )
-          );
+  // Handle the streaming in the background with error handling
+  (async () => {
+    const writer = writable.getWriter();
+    
+    try {
+      // Set up pipeline for direct streaming
+      process.stdout!.on('data', async (chunk) => {
+        if (!hasError) {
+          try {
+            await writer.write(chunk);
+          } catch (error) {
+            hasError = true;
+            process.kill();
+            await writer.close();
+          }
         }
       });
 
-      process.on("error", (err) => {
-        console.error("yt-dlp process error:", err);
-        reject(
-          new Response(JSON.stringify({ error: "Internal server error" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          })
-        );
+      // Handle end of stream
+      process.stdout!.on('end', async () => {
+        if (!hasError) {
+          try {
+            await writer.close();
+          } catch (error) {
+            console.error("Error closing writer:", error);
+          }
+        }
       });
-    });
-  } catch (err) {
-    console.error("Error fetching the audio:", err);
-    return new Response(JSON.stringify({ error: "Failed to fetch audio stream" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+
+    } catch (error) {
+      hasError = true;
+      console.error("Streaming error:", error);
+      process.kill();
+      try {
+        await writer.close();
+      } catch {}
+    }
+  })();
+
+  // Error handling
+  process.stderr!.on('data', (data) => {
+    if (!hasError) {
+      console.error(`yt-dlp error: ${data}`);
+    }
+  });
+
+  process.on('error', (error) => {
+    if (!hasError) {
+      hasError = true;
+      console.error('Process error:', error);
+      process.kill();
+    }
+  });
+
+  // Set up response with optimized headers
+  return new Response(readable, {
+    headers: {
+      'Content-Type': CONTENT_TYPE_MP3,
+      'Content-Disposition': `attachment; filename="${title}.mp3"`,
+      'Transfer-Encoding': 'chunked',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Song-Title' : title,
+      'Expires': '0',
+      'Connection': 'keep-alive'
+    }
+  });
+};
+
+export async function GET(req: NextRequest) {
+  try {
+    const id = new URL(req.url).searchParams.get("id")?.trim();
+    if (!id) {
+      return createErrorResponse("Missing required parameter: id", 400);
+    }
+
+    // Parallel processing of video info and stream preparation
+    const videoUrl = `https://www.youtube.com/watch?v=${id}`;
+    const [video] = await Promise.all([
+      YouTube.getVideo(videoUrl).catch(() => null),
+      // Add any other parallel tasks here if needed
+    ]);
+
+    if (!video) {
+      return createErrorResponse("Video not found", 404);
+    }
+
+    const title = video.title?.toString()
+      .split(' ')
+      .slice(0, 4)
+      .join(' ')
+      .trim();
+
+    return await streamAudio(videoUrl, title as string);
+    
+  } catch (error) {
+    console.error("Error processing request:", error);
+    return createErrorResponse("Failed to process request", 500);
   }
 }

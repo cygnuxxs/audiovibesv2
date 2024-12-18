@@ -83,6 +83,7 @@ const PlayCard: React.FC<{ id: string }> = ({ id }) => {
             <Button
               onClick={handlePause}
               size="sm"
+              className="animate-pulse"
             >
               <PauseCircle className="w-6 h-6" />
             </Button>

@@ -13,7 +13,7 @@ const page = async () => {
   const id = cookieStore.get('id')
   return (
     <div className="w-screen h-svh flex items-center justify-center">
-      <div className="p-4 flex flex-col bg-primary-foreground shadow-md max-w-4xl w-11/12 h-5/6 rounded-lg">
+      <div className="p-4 flex flex-col bg-primary-foreground shadow-md max-w-4xl w-11/12 max-sm:h-full max-sm:w-full h-5/6 rounded-lg">
         <div className="flex items-center justify-between pb-4">
           <p className="text-xs">
             <span className="font-bold text-primary rounded-md text-xl">

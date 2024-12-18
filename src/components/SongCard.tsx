@@ -6,13 +6,14 @@ import { Video } from "youtube-sr";
 import { formatViews } from "@/lib/utils";
 import { Button } from "./ui/button";
 import PlayCard from "./PlayCard";
+import { AspectRatio } from "./ui/aspect-ratio";
 
 const SongCard: React.FC<{ song: Video }> = ({ song }) => {
   const jsonData = song.toJSON();
   return (
-    <div className="flex h-[8rem] w-full gap-3 ">
+    <div className="flex min-h-[8rem] w-full gap-3 ">
       <Image
-        className="w-[200px] rounded-md h-auto"
+        className="w-[200px] max-sm:w-[100px] max-sm:object-cover rounded-md h-auto"
         src={String(song.thumbnail?.url)}
         height={song.thumbnail?.height}
         width={song.thumbnail?.width}

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { saveSongName } from "@/lib/actions";
 import { Music2 } from "lucide-react";
 import React, { Suspense } from "react";
-import Loading from "./loading";
+import Loading from "./loaders/loading";
 import { cookies } from "next/headers";
 import SearchResults from "@/components/SearchResults";
 
@@ -24,7 +24,7 @@ const page = async () => {
           <ModeToggle />
         </div>
         <form action={saveSongName} className="flex items-center gap-2">
-          <Input placeholder="Enter your Favourite Music" name="song-name" />
+          <Input required minLength={3} placeholder="Enter your Favourite Music" name="song-name" />
           <Button size={"sm"}>
             Find <Music2 />
           </Button>

@@ -1,10 +1,11 @@
-import { CirclePlay, Clock, Disc, Download, History } from "lucide-react";
+import {Clock, Disc, Download, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Video } from "youtube-sr";
 import { formatViews } from "@/lib/utils";
 import { Button } from "./ui/button";
+import PlayCard from "./PlayCard";
 
 const SongCard: React.FC<{ song: Video }> = ({ song }) => {
   const jsonData = song.toJSON();
@@ -55,7 +56,7 @@ const SongCard: React.FC<{ song: Video }> = ({ song }) => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button className="h-8" size={'sm'}><CirclePlay />Play</Button>
+          <PlayCard id = {jsonData.id} />
           <Button className="h-8" size={'sm'}><Download />Download</Button>
         </div>
       </div>

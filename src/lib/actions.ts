@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import YouTube from "youtube-sr"
 import { generateRandomId } from "./utils"
 
+
 export const searchSongs = async () => {
     const cookieStore = await cookies()
     const songName = cookieStore.get('songName')?.value

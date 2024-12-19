@@ -103,7 +103,7 @@ export class YouTubeAudioService {
             title
           )}.mp3"`,
           "Cache-Control": "no-store",
-          "Song-Title": title,
+          "Song-Title": encodeURIComponent(title),
         },
       });
     } catch (error) {

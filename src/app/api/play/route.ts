@@ -9,10 +9,9 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
 
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const videoDetails = await YouTube.getVideo(videoUrl);
-    const title = videoDetails.title || "audio";
+    const videoTitle = (await YouTube.getVideo(videoUrl)).title as string
 
-    return await YouTubeAudioService.streamAudio(videoUrl, title);
+    return await YouTubeAudioService.streamAudio(videoUrl, videoTitle);
   } catch (error) {
     console.error("Request processing error:", error);
     return YouTubeAudioService.createErrorResponse("Failed to process the request", 500);

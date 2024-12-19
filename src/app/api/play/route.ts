@@ -48,6 +48,7 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
             await writer.write(chunk);
           } catch (error) {
             hasError = true;
+            console.error(error)
             process.kill();
             await writer.close();
           }

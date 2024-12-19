@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import YouTube from "youtube-sr";
 import { YouTubeAudioService } from "@/lib/services";
 export async function GET(req: NextRequest): Promise<Response> {
   try {

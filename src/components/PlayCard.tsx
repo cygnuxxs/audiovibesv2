@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { CirclePlay, PauseCircle, Download } from "lucide-react";
 import Spinner from "@/app/loaders/Spinner";
 
-const PlayCard: React.FC<{ id: string }> = ({ id }) => {
+const PlayCard: React.FC<{ id: string, videoTitle : string }> = ({ id, videoTitle }) => {
   const [isLoading, setLoading] = useState(false);
   const [isPlaying, setPlaying] = useState(false);
   const [audioTitle, setAudioTitle] = useState<string>("Unknown Audio");
@@ -14,14 +14,14 @@ const PlayCard: React.FC<{ id: string }> = ({ id }) => {
 
   // Fetch the audio blob and title from the server
   const fetchAudioBlob = async () => {
-    const audioUrl = `/api/play?id=${id}`;
+    const audioUrl = `/api/play?id=${id}?title=${encodeURIComponent(videoTitle)}`;
 
     const response = await fetch(audioUrl);
     if (!response.ok) {
       throw new Error("Failed to fetch audio stream");
     }
 
-    const title = decodeURIComponent(response.headers.get("Song-Title") as string) || "Unknown Audio"; // Fallback title
+    const title = videoTitle || "Unknown Audio"; // Fallback title
     const blob = await response.blob();
 
     return { blob, title };

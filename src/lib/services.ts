@@ -72,7 +72,7 @@ export class YouTubeAudioService {
     });
   }
 
-  static async streamAudio(videoUrl: string, title: string): Promise<Response> {
+  static async streamAudio(videoUrl: string, title :string): Promise<Response> {
     try {
       const ytDlp = await YTDlpManager.getInstance().getYTDlp();
       const { readable, writable } = new TransformStream();
@@ -103,7 +103,6 @@ export class YouTubeAudioService {
             title
           )}.mp3"`,
           "Cache-Control": "no-store",
-          "Song-Title": encodeURIComponent(title),
         },
       });
     } catch (error) {

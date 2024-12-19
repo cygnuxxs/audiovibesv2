@@ -55,7 +55,7 @@ const SongCard: React.FC<{ song: Video }> = ({ song }) => {
           </p>
         </div>
         <div className="flex gap-2">
-          <PlayCard id = {jsonData.id} />
+          <PlayCard videoTitle={jsonData.title} id = {jsonData.id} />
         </div>
       </div>
     </div>

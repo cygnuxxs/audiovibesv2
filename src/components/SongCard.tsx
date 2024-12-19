@@ -4,16 +4,14 @@ import Link from "next/link";
 import React from "react";
 import { Video } from "youtube-sr";
 import { formatViews } from "@/lib/utils";
-import { Button } from "./ui/button";
 import PlayCard from "./PlayCard";
-import { AspectRatio } from "./ui/aspect-ratio";
 
 const SongCard: React.FC<{ song: Video }> = ({ song }) => {
   const jsonData = song.toJSON();
   return (
-    <div className="flex min-h-[8rem] w-full gap-3 ">
+    <div className="flex w-full gap-3 ">
       <Image
-        className="w-[200px] max-sm:w-[100px] max-sm:object-cover rounded-md h-auto"
+        className="w-[200px] max-sm:w-[100px] object-cover rounded-md h-auto"
         src={String(song.thumbnail?.url)}
         height={song.thumbnail?.height}
         width={song.thumbnail?.width}
@@ -36,7 +34,7 @@ const SongCard: React.FC<{ song: Video }> = ({ song }) => {
           />
           <span className="pr-2">{song.channel?.name}</span>
         </Link>
-        <div className="flex text-xs font-medium text-muted-foreground gap-2">
+        <div className="flex flex-wrap text-xs font-medium text-muted-foreground gap-2">
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Clock size={"14px"} />
@@ -58,7 +56,6 @@ const SongCard: React.FC<{ song: Video }> = ({ song }) => {
         </div>
         <div className="flex gap-2">
           <PlayCard id = {jsonData.id} />
-          <Button className="h-8" size={'sm'}><Download />Download</Button>
         </div>
       </div>
     </div>

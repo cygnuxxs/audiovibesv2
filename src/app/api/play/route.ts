@@ -10,32 +10,27 @@ const YT_DLP_FLAGS = [
   '-f', 'bestaudio[ext=m4a]/bestaudio',
   '--extract-audio',
   '--audio-format', 'mp3',
-  '--audio-quality', '0',  // Best quality for faster processing
-  '--no-playlist',         // Disable playlist processing
+  '--audio-quality', '0', // Best quality
+  '--no-playlist',        // Disable playlist processing
   '--no-warnings',  
   '--quiet',
   '--no-progress',  
   '--no-colors',
-  '-o', '-'               // Output to stdout
+  '-o', '-'              // Output to stdout
 ];
 
-const createErrorResponse = (message: string, status: number): Response => 
+const createErrorResponse = (message: string, status: number): Response =>
   new Response(
     JSON.stringify({ error: message }),
     { status, headers: { "Content-Type": CONTENT_TYPE_JSON } }
   );
 
 const streamAudio = async (videoUrl: string, title: string): Promise<Response> => {
-  const { readable, writable } = new TransformStream({
-    transform(chunk, controller) {
-      controller.enqueue(chunk);
-    },
-    flush(controller) {
-      controller.terminate();
-    }
-  });
-
+  const { readable, writable } = new TransformStream();
   let hasError = false;
+
+  // Encode title for safe use in HTTP headers
+  const encodedTitle = encodeURIComponent(title);
 
   // Spawn yt-dlp with optimized flags
   const process = spawn('yt-dlp', [...YT_DLP_FLAGS, videoUrl], {
@@ -45,9 +40,8 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
   // Handle the streaming in the background with error handling
   (async () => {
     const writer = writable.getWriter();
-    
+
     try {
-      // Set up pipeline for direct streaming
       process.stdout!.on('data', async (chunk) => {
         if (!hasError) {
           try {
@@ -60,7 +54,6 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
         }
       });
 
-      // Handle end of stream
       process.stdout!.on('end', async () => {
         if (!hasError) {
           try {
@@ -70,7 +63,6 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
           }
         }
       });
-
     } catch (error) {
       hasError = true;
       console.error("Streaming error:", error);
@@ -91,7 +83,7 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
   process.on('error', (error) => {
     if (!hasError) {
       hasError = true;
-      console.error('Process error:', error);
+      console.error("Process error:", error);
       process.kill();
     }
   });
@@ -99,14 +91,14 @@ const streamAudio = async (videoUrl: string, title: string): Promise<Response> =
   // Set up response with optimized headers
   return new Response(readable, {
     headers: {
-      'Content-Type': CONTENT_TYPE_MP3,
-      'Content-Disposition': `attachment; filename="${title}.mp3"`,
-      'Transfer-Encoding': 'chunked',
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma': 'no-cache',
-      'Song-Title' : title,
-      'Expires': '0',
-      'Connection': 'keep-alive'
+      "Content-Type": CONTENT_TYPE_MP3,
+      "Content-Disposition": `attachment; filename="${encodedTitle}.mp3"`, // Encode title for safe download
+      "Transfer-Encoding": "chunked",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+      "Pragma": "no-cache",
+      "Song-Title": encodeURIComponent(title), // Encode title for headers
+      "Expires": "0",
+      "Connection": "keep-alive"
     }
   });
 };
@@ -120,25 +112,19 @@ export async function GET(req: NextRequest) {
 
     // Parallel processing of video info and stream preparation
     const videoUrl = `https://www.youtube.com/watch?v=${id}`;
-    const [video] = await Promise.all([
-      YouTube.getVideo(videoUrl).catch(() => null),
-      // Add any other parallel tasks here if needed
-    ]);
+    const video = await YouTube.getVideo(videoUrl).catch(() => null);
 
     if (!video) {
       return createErrorResponse("Video not found", 404);
     }
 
-    const title = video.title?.toString()
-      .split(' ')
-      .slice(0, 4)
-      .join(' ')
-      .trim();
+    const title = video.title as string;
 
-    return await streamAudio(videoUrl, title as string);
-    
+    return await streamAudio(videoUrl, title);
+
   } catch (error) {
     console.error("Error processing request:", error);
     return createErrorResponse("Failed to process request", 500);
   }
 }
+  

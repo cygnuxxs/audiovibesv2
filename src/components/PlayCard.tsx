@@ -1,137 +1,170 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { CirclePlay, PauseCircle, Download } from "lucide-react";
 import Spinner from "@/app/loaders/Spinner";
 
-const PlayCard: React.FC<{ id: string, videoTitle : string }> = ({ id, videoTitle }) => {
+interface PlayCardProps {
+  id: string;
+  videoTitle: string;
+}
+
+const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle }) => {
   const [isLoading, setLoading] = useState(false);
   const [isPlaying, setPlaying] = useState(false);
-  const [audioTitle, setAudioTitle] = useState<string>("Unknown Audio");
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [cachedBlob, setCachedBlob] = useState<Blob | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
-  // Fetch the audio blob and title from the server
-  const fetchAudioBlob = async () => {
-    const audioUrl = `/api/play?id=${id}?title=${encodeURIComponent(videoTitle)}`;
-
+  // Fetch the audio blob from the server
+  const fetchAudioBlob = useCallback(async () => {
+    const audioUrl = `/api/play?id=${id}`;
     const response = await fetch(audioUrl);
+    
     if (!response.ok) {
-      throw new Error("Failed to fetch audio stream");
+      throw new Error(`Failed to fetch audio: ${response.statusText}`);
     }
 
-    const title = videoTitle || "Unknown Audio"; // Fallback title
     const blob = await response.blob();
+    setCachedBlob(blob);
+    return blob;
+  }, [id]);
 
-    return { blob, title };
-  };
-
-  // Handle play stream logic
-  const handlePlayStream = async () => {
-    if (audioBlob) {
-      // Use cached blob if available
-      if (audioRef.current) {
-        if (audioRef.current.paused) {
-          await audioRef.current.play();
-          setPlaying(true);
-          toast.success(`${audioTitle} is now playing!`);
-        }
-      }
-      return;
+  // Clean up the blob URL
+  const cleanupBlobUrl = useCallback(() => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
     }
+  }, []);
 
-    setLoading(true);
+  // Handle audio playback
+  const handlePlayback = useCallback(async () => {
+    if (!audioRef.current) return;
+
     try {
-      const { blob, title } = await fetchAudioBlob();
-      setAudioBlob(blob); // Cache the blob
-      setAudioTitle(title); // Set the title
-
-      const audioObjectUrl = URL.createObjectURL(blob);
-      if (audioRef.current) {
-        audioRef.current.src = audioObjectUrl;
-        await audioRef.current.play();
-        setPlaying(true);
-        toast.success(`${title} is now playing!`); // Use the fetched title
+      // Handle pause
+      if (isPlaying) {
+        audioRef.current.pause();
+        setPlaying(false);
+        return;
       }
-    } catch (err) {
-      console.error("Error playing the audio stream:", err);
-      toast.error("Failed to play the audio. Please try again.");
+
+      setLoading(true);
+
+      let blob: Blob;
+      // Use cached blob if available, otherwise fetch
+      if (cachedBlob) {
+        blob = cachedBlob;
+      } else {
+        blob = await fetchAudioBlob();
+      }
+
+      // Create new blob URL
+      cleanupBlobUrl();
+      const blobUrl = URL.createObjectURL(blob);
+      blobUrlRef.current = blobUrl;
+      audioRef.current.src = blobUrl;
+
+      await audioRef.current.play();
+      setPlaying(true);
+      toast.success(`${videoTitle} is now playing!`);
+    } catch (error) {
+      console.error("Playback error:", error);
+      toast.error("Failed to play audio. Please try again.");
+      cleanupBlobUrl();
+      setCachedBlob(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [videoTitle, fetchAudioBlob, cleanupBlobUrl, cachedBlob, isPlaying]);
 
-  // Pause audio playback
-  const handlePause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setPlaying(false);
-    }
-  };
-
-  // Handle audio download
-  const handleDownload = async () => {
+  // Handle download
+  const handleDownload = useCallback(async () => {
     try {
-      let blob = audioBlob;
-      let title = audioTitle;
+      setLoading(true);
 
-      // Fetch the blob and title if not cached
-      if (!blob) {
-        setLoading(true);
-        const result = await fetchAudioBlob();
-        blob = result.blob;
-        title = result.title;
-        setAudioBlob(blob); // Cache the blob for reuse
-        setAudioTitle(title); // Update the title
-      }
+      // Use cached blob if available, otherwise fetch
+      const blob = cachedBlob || await fetchAudioBlob();
 
-      // Ensure the blob is valid
-      if (!blob) {
-        throw new Error("Failed to fetch audio blob");
-      }
-
-      // Trigger download
+      const downloadUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `${title}.mp3`; // Use the fetched or cached title
+      link.href = downloadUrl;
+      link.download = `${videoTitle}.mp3`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      toast.success(`Downloading: ${title}`); // Show title in the toast
+      
+      // Cleanup download URL
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 100);
+      
+      toast.success(`Downloading: ${videoTitle}`);
     } catch (error) {
-      console.error("Error downloading audio:", error);
-      toast.error("Failed to download the audio. Please try again.");
+      console.error("Download error:", error);
+      toast.error("Failed to download audio. Please try again.");
+      setCachedBlob(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [videoTitle, fetchAudioBlob, cachedBlob]);
+
+  // Reset play state when audio ends
+  const handleAudioEnd = useCallback(() => {
+    setPlaying(false);
+  }, []);
+
+  // Handle audio error
+  const handleAudioError = useCallback(() => {
+    setPlaying(false);
+    cleanupBlobUrl();
+    setCachedBlob(null);
+    toast.error("Audio playback error. Please try again.");
+  }, [cleanupBlobUrl]);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      cleanupBlobUrl();
+      setCachedBlob(null);
+    };
+  }, [cleanupBlobUrl]);
 
   return (
     <div className="flex items-center gap-2">
-      <audio ref={audioRef} onEnded={() => setPlaying(false)} />
+      <audio 
+        ref={audioRef} 
+        onEnded={handleAudioEnd}
+        onError={handleAudioError}
+      />
 
       {isLoading ? (
         <Spinner />
       ) : (
         <div className="flex items-center gap-2">
-          {!isPlaying ? (
-            <Button onClick={handlePlayStream} size="sm" disabled={isPlaying}>
-              <CirclePlay className="w-6 h-6" /> Play
-            </Button>
-          ) : (
-            <Button
-              onClick={handlePause}
-              size="sm"
-              className="animate-pulse"
-            >
-              <PauseCircle className="w-6 h-6" />
-              Pause
-            </Button>
-          )}
+          <Button 
+            onClick={handlePlayback} 
+            size="sm" 
+            disabled={isLoading}
+            className={isPlaying ? "animate-pulse" : ""}
+          >
+            {!isPlaying ? (
+              <>
+                <CirclePlay className="w-6 h-6" /> Play
+              </>
+            ) : (
+              <>
+                <PauseCircle className="w-6 h-6" /> Pause
+              </>
+            )}
+          </Button>
 
-          <Button onClick={handleDownload} size="sm" className="h-8">
+          <Button 
+            onClick={handleDownload} 
+            size="sm" 
+            className="h-8"
+            disabled={isLoading}
+          >
             <Download className="w-6 h-6" />
             Download
           </Button>

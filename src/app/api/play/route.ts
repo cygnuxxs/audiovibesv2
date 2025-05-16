@@ -2,6 +2,24 @@
 import { NextRequest } from "next/server";
 import ytdl from "@distube/ytdl-core";
 
+import { Agent } from 'https';
+
+// Create a custom agent with browser-like headers
+const agent = new Agent({
+  keepAlive: true,
+});
+
+// Utility to enhance request options
+const getRequestOptions = () => ({
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://www.youtube.com/',
+  },
+  agent,
+});
+
 // Constants
 const AUDIO_QUALITY = "highestaudio";
 const MAX_VIDEO_LENGTH = 3600; // 1 hour in seconds
@@ -64,7 +82,8 @@ export async function GET(req: NextRequest) {
     const audioStream = ytdl(videoUrl, {
       quality: AUDIO_QUALITY,
       filter: 'audioonly',
-      highWaterMark: 1 << 25 // 32MB buffer
+      highWaterMark: 1 << 25,
+      requestOptions : getRequestOptions()
     });
 
     const readableStream = new ReadableStream({

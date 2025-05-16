@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { CirclePlay, PauseCircle, Download } from "lucide-react";
 import Spinner from "@/app/loaders/Spinner";
+import { cn } from "@/lib/utils";
 
 interface PlayCardProps {
   id: string;
@@ -91,7 +92,7 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle }) => {
       const downloadUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `${videoTitle}.mp3`;
+      link.download = `${videoTitle}.opus`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -137,16 +138,12 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle }) => {
         onEnded={handleAudioEnd}
         onError={handleAudioError}
       />
-
-      {isLoading ? (
-        <Spinner />
-      ) : (
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             onClick={handlePlayback} 
             size="sm" 
             disabled={isLoading}
-            className={isPlaying ? "animate-pulse" : ""}
+            className={cn(isPlaying && 'animate-pulse')}
           >
             {!isPlaying ? (
               <>
@@ -157,6 +154,7 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle }) => {
                 <PauseCircle className="w-6 h-6" /> Pause
               </>
             )}
+            {isLoading && <Spinner />}
           </Button>
 
           <Button 
@@ -169,7 +167,6 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle }) => {
             Download
           </Button>
         </div>
-      )}
     </div>
   );
 };

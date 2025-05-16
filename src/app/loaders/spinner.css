@@ -1,65 +1,15 @@
-/* Custom Loader Animation - 2rem */
-.custom-loader {
-  width: 2rem; /* 32px */
-  height: 2rem; /* 32px */
-  background: #3b82f6;
-  border-radius: 50%; /* Keeps the shape circular */
-
-  /* Masking setup for all browsers */
-  mask: 
-    radial-gradient(circle 0.9rem at 50% calc(100% + 0.4rem), #000 95%, transparent) top 0.125rem left 50%,
-    radial-gradient(circle 0.9rem, #000 95%, transparent) center,
-    radial-gradient(circle 0.9rem at 50% -0.4rem, #000 95%, transparent) bottom 0.125rem left 50%,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  mask-repeat: no-repeat;
-
-  /* Webkit-specific masking for Safari and older browsers */
-  -webkit-mask: 
-    radial-gradient(circle 0.9rem at 50% calc(100% + 0.4rem), #000 95%, transparent) top 0.125rem left 50%,
-    radial-gradient(circle 0.9rem, #000 95%, transparent) center,
-    radial-gradient(circle 0.9rem at 50% -0.4rem, #000 95%, transparent) bottom 0.125rem left 50%,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  -webkit-mask-repeat: no-repeat;
-
-  /* Animation setup */
-  animation: loader-animation 1.5s infinite;
+/* From Uiverse.io by Cornerstone-04 */ 
+.loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #1c47d450;
+  border-top-color: var(--primary);
+  animation: spin013151 1s linear infinite;
+  border-radius: 100%;
 }
 
-@keyframes loader-animation {
-  0% {
-      -webkit-mask-size: 0 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
-              mask-size: 0 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
-  }
-
-  16.67% {
-      -webkit-mask-size: 100% 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
-              mask-size: 100% 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
-  }
-
-  33.33% {
-      -webkit-mask-size: 100% 0.5625rem, 100% 0.5625rem, 0 0.5625rem, auto;
-              mask-size: 100% 0.5625rem, 100% 0.5625rem, 0 0.5625rem, auto;
-  }
-
-  50% {
-      -webkit-mask-size: 100% 0.5625rem, 100% 0.5625rem, 100% 0.5625rem, auto;
-              mask-size: 100% 0.5625rem, 100% 0.5625rem, 100% 0.5625rem, auto;
-  }
-
-  66.67% {
-      -webkit-mask-size: 0 0.5625rem, 100% 0.5625rem, 100% 0.5625rem, auto;
-              mask-size: 0 0.5625rem, 100% 0.5625rem, 100% 0.5625rem, auto;
-  }
-
-  83.33% {
-      -webkit-mask-size: 0 0.5625rem, 0 0.5625rem, 100% 0.5625rem, auto;
-              mask-size: 0 0.5625rem, 0 0.5625rem, 100% 0.5625rem, auto;
-  }
-
-  100% {
-      -webkit-mask-size: 0 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
-              mask-size: 0 0.5625rem, 0 0.5625rem, 0 0.5625rem, auto;
+@keyframes spin013151 {
+  to {
+    transform: rotate(360deg);
   }
 }

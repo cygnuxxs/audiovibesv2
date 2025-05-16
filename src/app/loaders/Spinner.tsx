@@ -3,9 +3,7 @@ import './spinner.css'
 
 const Spinner = () => {
   return (
-    <div className=''>
-        <div className='custom-loader'></div>
-    </div>
+        <div className='loader w-8 h-8'></div>
   )
 }
 

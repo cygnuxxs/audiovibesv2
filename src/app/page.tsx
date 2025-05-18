@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { saveSongName } from "@/lib/actions";
 import { Music2 } from "lucide-react";
 import React, { Suspense } from "react";
-import Loading from "./loaders/loading";
 import { cookies } from "next/headers";
 import SearchResults from "@/components/SearchResults";
+import LoadingText from "./loaders/LoadingText";
 
 const page = async () => {
   const cookieStore = await cookies()
@@ -30,7 +30,7 @@ const page = async () => {
           </Button>
         </form>
         <div className="flex-1 overflow-y-scroll gap-4 flex flex-col mt-4">
-          <Suspense key={id?.value} fallback = {<Loading />}>
+          <Suspense key={id?.value} fallback = {<LoadingText />}>
           <SearchResults />
           </Suspense>
         </div>

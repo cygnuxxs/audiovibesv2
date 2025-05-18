@@ -1,30 +1,18 @@
 
 import { NextRequest } from "next/server";
 import ytdl from "@distube/ytdl-core";
+import { sanitizedCookies } from "@/lib/utils";
 
-import { Agent } from 'https';
 
-// Create a custom agent with browser-like headers
-const agent = new Agent({
-  keepAlive: true,
-});
-
-// Utility to enhance request options
-const getRequestOptions = () => ({
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Accept': '*/*',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://www.youtube.com/',
-  },
-  agent,
-});
 
 // Constants
 const AUDIO_QUALITY = "highestaudio";
 const MAX_VIDEO_LENGTH = 3600; // 1 hour in seconds
 
-
+const agentOptions = {
+  maxRedirections: 3,
+};
+const agent = ytdl.createAgent(sanitizedCookies, agentOptions)
 // Utility functions
 const sanitizeTitle = (title: string): string => {
   return title.replace(/[^\w\s-]/g, '').trim() || "audio";
@@ -64,7 +52,7 @@ export async function GET(req: NextRequest) {
 
     const videoUrl = `https://www.youtube.com/watch?v=${id}`;
 
-    const info = await ytdl.getBasicInfo(videoUrl) as VideoInfo;
+    const info = await ytdl.getBasicInfo(videoUrl, {agent}) as VideoInfo;
     
     try {
       validateVideoLength(info.videoDetails.lengthSeconds);
@@ -83,7 +71,6 @@ export async function GET(req: NextRequest) {
       quality: AUDIO_QUALITY,
       filter: 'audioonly',
       highWaterMark: 1 << 25,
-      requestOptions : getRequestOptions()
     });
 
     const readableStream = new ReadableStream({

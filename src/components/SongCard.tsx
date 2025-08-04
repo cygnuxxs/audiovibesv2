@@ -12,9 +12,9 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
     song.artists.primary[song.artists.primary.length - 1]?.image.at(-1);
 
   return (
-    <div className="flex flex-1 sm:min-w-[30rem] max-sm:flex-col gap-3">
+    <div className="flex flex-1 sm:min-w-[30rem] items-center gap-3 p-0">
         <Image
-          className=" object-cover rounded-md h-auto"
+          className="object-cover rounded-md max-sm:max-w-[8rem] max-sm:h-auto"
           src={highestImageUrl}
           height={200}
           width={200}
@@ -54,12 +54,14 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
             </span>
             {formatDuration(song.duration)}
           </p>
-          <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
+          {song.playCount && (
+<p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Disc size={"14px"} />
             </span>
             {formatViews(song.playCount as number)}
           </p>
+          )}
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <History size={"14px"} />

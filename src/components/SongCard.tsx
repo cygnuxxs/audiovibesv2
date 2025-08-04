@@ -1,61 +1,74 @@
-import {Clock, Disc, History } from "lucide-react";
+import { Clock, Disc, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { Video } from "youtube-sr";
-import { formatViews } from "@/lib/utils";
+import { formatDuration, formatViews } from "@/lib/utils";
 import PlayCard from "./PlayCard";
+import { decode } from "he";
 
-const SongCard: React.FC<{ song: Video }> = ({ song }) => {
-  const jsonData = song.toJSON();
+const SongCard: React.FC<{ song: Song }> = ({ song }) => {
+  const highestImageUrl = song.image[song.image.length - 1]?.url;
+  const artistImageUrl =
+    song.artists.primary[song.artists.primary.length - 1]?.image.at(-1);
+
   return (
-    <div className="flex w-full gap-3 ">
-      <Image
-        className="w-[200px] max-sm:w-[100px] object-cover rounded-md h-auto"
-        src={String(song.thumbnail?.url)}
-        height={song.thumbnail?.height}
-        width={song.thumbnail?.width}
-        alt={String(song.title)}
-      />
-      <div className="flex flex-col gap-2">
-        <h2 className="line-clamp-1 text-sm">{song.title}</h2>
+    <div className="flex flex-1 sm:min-w-[30rem] max-sm:flex-col gap-3">
+        <Image
+          className=" object-cover rounded-md h-auto"
+          src={highestImageUrl}
+          height={200}
+          width={200}
+          alt={song.name}
+          priority
+        />
+      <div className="space-y-2">
+        <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>
+        <Link
+          target="_blank"
+          className="text-[0.6rem] text-muted-foreground hover:text-primary font-bold rounded-full bg-muted w-fit p-1"
+          href={song.album?.url ?? "#"}
+        >
+          From {decode(song.album?.name as string)}
+        </Link>
         <Link
           className="flex gap-2 text-xs items-center text-muted-foreground bg-muted w-fit rounded-full hover:text-primary font-bold"
           target="_blank"
           rel="noopener noreferrer"
-          href={song.channel?.url || "#"}
+          href={song.url || "#"}
         >
-          <Image
-            className="rounded-full"
-            src={jsonData.channel.icon}
-            height={25}
-            width={25}
-            alt={jsonData.channel.name}
-          />
-          <span className="pr-2">{song.channel?.name}</span>
+          {artistImageUrl?.url && (
+            <Image
+              className="rounded-full"
+              src={artistImageUrl?.url ?? "/profile-circle.png"}
+              height={25}
+              width={25}
+              alt={song.artists?.primary[0]?.name}
+            />
+          )}
+          <span className="pr-2">{song.artists?.primary[0]?.name}</span>
         </Link>
         <div className="flex flex-wrap text-xs font-medium text-muted-foreground gap-2">
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Clock size={"14px"} />
             </span>
-            {jsonData.duration_formatted}
+            {formatDuration(song.duration)}
           </p>
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Disc size={"14px"} />
             </span>
-            {formatViews(jsonData.views)}
+            {formatViews(song.playCount as number)}
           </p>
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <History size={"14px"} />
             </span>
-            {jsonData.uploadedAt}
+            {song.year}
           </p>
         </div>
         <div className="flex gap-2">
-          <PlayCard videoTitle={jsonData.title} id = {jsonData.id} />
+          <PlayCard videoTitle={decode(song.name)} id={song.id} album={song.album.name as string} />
         </div>
       </div>
     </div>

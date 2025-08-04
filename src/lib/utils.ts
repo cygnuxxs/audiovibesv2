@@ -297,3 +297,13 @@ export const sanitizedCookies = cookies.map(cookie => ({
   ...cookie,
   sameSite: cookie.sameSite === null ? undefined : cookie.sameSite
 }));
+
+
+export const formatDuration = (totalSeconds: number | null | undefined): string => {
+  if (typeof totalSeconds !== 'number' || totalSeconds < 0 || !isFinite(totalSeconds)) {
+    return "0m 0s";
+  }
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+  return `${minutes}m ${seconds}s`;
+};

@@ -12,20 +12,20 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
     song.artists.primary[song.artists.primary.length - 1]?.image.at(-1);
 
   return (
-    <div className="flex flex-1 sm:min-w-[30rem] items-center gap-3 p-0">
+    <div className="flex flex-1 sm:min-w-120 items-center gap-3 p-0">
         <Image
-          className="object-cover rounded-md max-sm:max-w-[8rem] max-sm:h-auto"
+          className="object-cover rounded-md max-sm:max-w-32 max-sm:h-auto"
           src={highestImageUrl}
           height={200}
           width={200}
           alt={song.name}
           priority
         />
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>
         <Link
           target="_blank"
-          className="text-[0.6rem] text-muted-foreground hover:text-primary font-bold rounded-full bg-muted w-fit p-1"
+          className="text-[0.6rem] text-muted-foreground bg-muted hover:text-primary font-bold rounded-full w-fit p-1"
           href={song.album?.url ?? "#"}
         >
           From {decode(song.album?.name as string)}

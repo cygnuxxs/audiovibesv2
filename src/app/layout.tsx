@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import ThemeDataProvider from "@/components/hooks/theme-color-provider";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -69,7 +70,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  verification : {
+  verification: {
     google: "5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY",
   },
 };
@@ -82,12 +83,18 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="en">
       <head>
-        <meta name="google-site-verification" content="5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY" />
+        <meta
+          name="google-site-verification"
+          content="5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY"
+        />
+        <meta name="apple-mobile-web-app-title" content="AudioVibes" />
       </head>
       <body className={`${montserrat.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-          <Toaster />
+          <ThemeDataProvider>
+            {children}
+            <Toaster />
+          </ThemeDataProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -173,7 +173,6 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
         }
       }
       setError(errorMessage);
-      toast.error(errorMessage);
     };
     const handleLoadStart = () => setError(null);
     const handlePause = () => setPlaying(false);

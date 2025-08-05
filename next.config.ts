@@ -6,10 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns : [
       {
         protocol: "https",
-        hostname : "aac.saavncdn.com",
-      },{
-        protocol: "https",
-        hostname : "c.saavncdn.com",
+        hostname : "*",
       }
     ]
   },

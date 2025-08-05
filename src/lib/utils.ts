@@ -14,16 +14,6 @@ export function formatViews(views: number) {
   return (views / 1e7).toFixed(1) + "Cr";
 }
 
-export function generateRandomId() {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let id = "";
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    id += characters[randomIndex];
-  }
-  return id;
-}
-
 export async function readableToBlob(readable: internal.Readable) {
   const chunks = [];
   for await (const chunk of readable) {
@@ -307,3 +297,13 @@ export const formatDuration = (totalSeconds: number | null | undefined): string 
   const seconds = Math.floor(totalSeconds % 60);
   return `${minutes}m ${seconds}s`;
 };
+
+
+export function generateRandomId(length: number = 4): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+}

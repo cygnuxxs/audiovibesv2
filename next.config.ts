@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
         hostname : "c.saavncdn.com",
       }
     ]
-  }
+  },
 };
 
 export default nextConfig;

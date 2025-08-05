@@ -10,6 +10,8 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
+export const dynamic = 'force-static'
+
 export const metadata: Metadata = {
   title: {
     default: "AudioVibes v2 By Cygnuxxs",
@@ -30,6 +32,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Cygnuxxs" }],
   creator: "Cygnuxxs",
+  publisher : 'Ashok Atragadda (Cygnuxxs)',
   robots: {
     index: true,
     follow: true,
@@ -67,8 +70,13 @@ export const metadata: Metadata = {
   // Add icons for better SEO and PWA support
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
+    shortcut: "/web-app-manifest-192x192.png",
     apple: "/apple-touch-icon.png",
+  },
+  appleWebApp : {
+    capable : true,
+    statusBarStyle : 'default',
+    title : 'AudioVibes'
   },
   verification: {
     google: "5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY",
@@ -81,14 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
-      <head>
-        <meta
-          name="google-site-verification"
-          content="5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY"
-        />
-        <meta name="apple-mobile-web-app-title" content="AudioVibes" />
-      </head>
+    <html lang="en">
       <body className={`${montserrat.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemeDataProvider>

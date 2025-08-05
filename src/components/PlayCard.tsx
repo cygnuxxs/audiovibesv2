@@ -12,7 +12,7 @@ import { CirclePlay, PauseCircle, Download } from "lucide-react";
 import Spinner from "@/app/loaders/Spinner";
 import { cn } from "@/lib/utils";
 import { decode } from "he";
-import {FFmpeg} from "@ffmpeg/ffmpeg"; // Import FFmpeg.js for audio conversion
+import { FFmpeg } from "@ffmpeg/ffmpeg"; // Import FFmpeg.js for audio conversion
 
 interface PlayCardProps {
   id: string;
@@ -31,21 +31,21 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const ffmpegRef = useRef<FFmpeg>(null); // Ref for FFmpeg instance
+  const ffmpegRef = useRef<FFmpeg | null>(null); // Ref for FFmpeg instance, initialized lazily
 
   const apiUrl = useMemo(() => `${API_BASE_URL}/${id}`, [id]);
 
-  // Initialize FFmpeg
-  useEffect(() => {
-    const loadFFmpeg = async () => {
+  // Lazy-load FFmpeg only when needed (optimization: defers memory allocation)
+  const loadFFmpeg = useCallback(async () => {
+    if (!ffmpegRef.current) {
       const ffmpeg = new FFmpeg();
-      ffmpegRef.current = ffmpeg;
       await ffmpeg.load();
-    };
-    loadFFmpeg();
+      ffmpegRef.current = ffmpeg;
+    }
+    return ffmpegRef.current;
   }, []);
 
-  // Fetch song URL from API
+  // Fetch song URL from API (unchanged, but used in both play and download)
   const fetchAudioUrl = useCallback(async () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -84,7 +84,7 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
     }
   }, [apiUrl]);
 
-  // Play/pause logic (unchanged)
+  // Play/pause logic (minor tweaks for efficiency)
   const handlePlayback = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -194,61 +194,71 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
 
   const handleDownload = useCallback(async () => {
     if (!audioUrl) {
-      toast.error("No audio URL available. Please play the song first to load the URL.");
-      return;
+      // Fetch URL if not available (avoids re-fetch if already set from playback)
+      setLoading(true);
+      const result = await fetchAudioUrl();
+      if (!result) {
+        setLoading(false);
+        toast.error("Failed to load audio URL for download");
+        return;
+      }
+      setAudioUrl(result.url);
+      // Note: We don't set audio.src here since we're not playing
     }
-    if (!ffmpegRef.current?.loaded) {
-      toast.error("FFmpeg is not loaded yet. Please try again.");
+
+    const ffmpeg = await loadFFmpeg(); // Lazy-load to save memory
+    if (!ffmpeg) {
+      toast.error("Failed to load conversion tools");
       return;
     }
 
     setLoading(true);
     try {
+      if (!audioUrl) {
+        throw new Error("Audio URL is not available");
+      }
       const response = await fetch(audioUrl, { mode: "cors" });
       if (!response.ok) {
         throw new Error(`Failed to fetch audio: ${response.status}`);
       }
       const arrayBuffer = await response.arrayBuffer();
-      const inputFileName = "input.audio"; // Temporary name for input
+      const inputFileName = "input.audio";
       const outputFileName = `${videoTitle} from ${album}.mp3`;
 
-      // Ensure arrayBuffer is an ArrayBuffer, not ArrayBufferLike
-      const validArrayBuffer =
-        arrayBuffer instanceof ArrayBuffer
-          ? arrayBuffer
-          : new Uint8Array(arrayBuffer).buffer;
+      // Write to FFmpeg FS
+      ffmpeg.writeFile(inputFileName, new Uint8Array(arrayBuffer as ArrayBuffer));
 
-      // Write the fetched audio data to FFmpeg's virtual file system
-      ffmpegRef.current.writeFile(inputFileName, new Uint8Array(validArrayBuffer));
-
-      // Run FFmpeg command to convert to MP3
-      await ffmpegRef.current.exec([
+      // Convert to MP3
+      await ffmpeg.exec([
         "-i",
         inputFileName,
         "-c:a",
-        "libmp3lame", // Use LAME encoder for MP3
+        "libmp3lame",
         "-q:a",
-        "2", // Quality setting (0-9, lower is better)
-        outputFileName
+        "2",
+        outputFileName,
       ]);
 
-      // Read the output file
-      const data = await ffmpegRef.current.readFile(outputFileName);
-      // Convert data to Uint8Array properly
-      const uint8Data = new Uint8Array(
-        data instanceof Uint8Array ? data : Buffer.from(data as string)
-      );
+      // Read output
+      const data = await ffmpeg.readFile(outputFileName);
+      // Ensure data is a Uint8Array with a standard ArrayBuffer
+      const uint8Data = new Uint8Array((data as Uint8Array).buffer as ArrayBuffer);
       const blob = new Blob([uint8Data], { type: "audio/mpeg" });
       const blobUrl = URL.createObjectURL(blob);
 
+      // Trigger download
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = outputFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       URL.revokeObjectURL(blobUrl);
+
+      // Optimization: Clean up FFmpeg files to free memory immediately
+      await ffmpeg.deleteFile(inputFileName);
+      await ffmpeg.deleteFile(outputFileName);
+
       toast.success(`Downloaded: ${outputFileName}`);
     } catch (err) {
       console.error("Download/Conversion error:", err);
@@ -256,8 +266,9 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
     } finally {
       setLoading(false);
     }
-  }, [audioUrl, videoTitle, album]);
+  }, [audioUrl, videoTitle, album, loadFFmpeg, fetchAudioUrl]);
 
+  // Cleanup effect (added FFmpeg termination for full unload)
   useEffect(() => {
     const audio = audioRef.current;
     return () => {
@@ -266,6 +277,10 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
         audio.pause();
         audio.src = "";
         audio.load();
+      }
+      if (ffmpegRef.current) {
+        ffmpegRef.current.terminate(); // Unload FFmpeg to free memory
+        ffmpegRef.current = null;
       }
     };
   }, []);
@@ -290,21 +305,19 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
     [isLoading, isPlaying]
   );
 
-  const DownloadButton = React.useMemo(
-    () => (
-      <Button
-        size={"sm"}
-        onClick={handleDownload}
-        disabled={buttonStates.downloadDisabled || !audioUrl}
-        variant="outline"
-        className="flex items-center gap-2"
-        aria-label={`Download ${videoTitle}`}
-      >
-        <Download className="w-5 h-5" />
-        <span className="ml-2">Download</span>
-      </Button>
-    ),
-    [audioUrl, buttonStates.downloadDisabled, videoTitle, handleDownload]
+  // Removed unnecessary useMemo for DownloadButton (minor optimization)
+  const DownloadButton = (
+    <Button
+      size={"sm"}
+      onClick={handleDownload}
+      disabled={buttonStates.downloadDisabled}
+      variant="outline"
+      className="flex items-center gap-2"
+      aria-label={`Download ${videoTitle}`}
+    >
+      <Download className="w-5 h-5" />
+      <span className="ml-2">Download</span>
+    </Button>
   );
 
   return (

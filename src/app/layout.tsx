@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
@@ -10,79 +9,6 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-export const dynamic = 'force-static'
-
-export const metadata: Metadata = {
-  title: {
-    default: "AudioVibes v2 By Cygnuxxs",
-    template: "%s | AudioVibes v2",
-  },
-  description:
-    "Discover, fetch, and download high-quality songs from JioSaavn at 320kbps. Owned and developed by Cygnuxxs for music enthusiasts.",
-  keywords: [
-    "AudioVibes v2",
-    "mp3 downloader",
-    "JioSaavn downloader",
-    "JioSaavn",
-    "song download",
-    "320kbps music",
-    "fetch songs",
-    "music app",
-    "AudioVibes",
-  ],
-  authors: [{ name: "Cygnuxxs" }],
-  creator: "Cygnuxxs",
-  publisher : 'Ashok Atragadda (Cygnuxxs)',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  openGraph: {
-    title: "AudioVibes v2 - High-Quality Song Downloads from JioSaavn",
-    description:
-      "Fetch and download your favorite songs from JioSaavn in 320kbps quality. Built for seamless music experiences.",
-    url: "https://audiovibes.vercel.app", // Replace with your actual domain
-    siteName: "AudioVibes v2",
-    images: [
-      {
-        url: "https://audiovibes.vercel.app/og-image.jpeg", // Replace with your actual OG image URL
-        width: 1200,
-        height: 630,
-        alt: "AudioVibes v2 Banner",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AudioVibes v2 - Download Songs from JioSaavn",
-    description: "Get 320kbps song downloads from JioSaavn with AudioVibes v2.",
-    images: ["https://audiovibes.vercel.app/og-image.jpeg"], // Replace with your actual Twitter image URL
-  },
-  // Add icons for better SEO and PWA support
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/web-app-manifest-192x192.png",
-    apple: "/apple-touch-icon.png",
-  },
-  appleWebApp : {
-    capable : true,
-    statusBarStyle : 'default',
-    title : 'AudioVibes'
-  },
-  verification: {
-    google: "5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY",
-  },
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -90,6 +16,43 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <title>AudioVibes v2 By Cygnuxxs</title>
+  <meta name="title" content="AudioVibes v2 By Cygnuxxs" />
+  <meta name="description" content="Discover, fetch, and download high-quality songs from JioSaavn at 320kbps. Owned and developed by Cygnuxxs for music enthusiasts." />
+  <meta name="keywords" content="AudioVibes v2, mp3 downloader, JioSaavn downloader, JioSaavn, song download, 320kbps music, fetch songs, music app, AudioVibes" />
+  <meta name="author" content="Cygnuxxs" />
+  <meta name="creator" content="Cygnuxxs"/>
+  <meta name="publisher" content="Ashok Atragadda (Cygnuxxs)"/>
+  <meta name="robots" content="index, follow"/>
+  <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1"/>
+  <meta property="og:title" content="AudioVibes v2 - High-Quality Song Downloads from JioSaavn"/>
+  <meta property="og:description" content="Fetch and download your favorite songs from JioSaavn in 320kbps quality. Built for seamless music experiences."/>
+  <meta property="og:url" content="https://audiovibes.vercel.app"/>
+  <meta property="og:site_name" content="AudioVibes v2"/>
+  <meta property="og:image" content="https://audiovibes.vercel.app/og-image.jpeg" />
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt" content="AudioVibes v2 Banner"/>
+  <meta property="og:locale" content="en_US"/>
+  <meta property="og:type" content="website"/>
+  
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="AudioVibes v2 - Download Songs from JioSaavn"/>
+  <meta name="twitter:description" content="Get 320kbps song downloads from JioSaavn with AudioVibes v2."/>
+  <meta name="twitter:image" content="https://audiovibes.vercel.app/og-image.jpeg"/>
+  
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="shortcut icon" href="/web-app-manifest-192x192.png"/>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="AudioVibes"/>
+  
+  <meta name="google-site-verification" content="5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY"/>
+</head>
       <body className={`${montserrat.className} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemeDataProvider>

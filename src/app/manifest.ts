@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+export const dynamic = 'force-static'
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "AudioVibes v2 By Cygnuxxs",
@@ -50,13 +52,13 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/web-app-manifest-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "any",
+        purpose: "maskable",
       },
       {
         src: "/web-app-manifest-192x192.png",
         sizes: "192x192",
         type: "image/png",
-        purpose: "maskable",
+        purpose: "any",
       },
       {
         src: "/web-app-manifest-512x512.png",

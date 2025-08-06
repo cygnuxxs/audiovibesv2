@@ -1,10 +1,14 @@
 import { ModeToggle } from "@/components/DarkModeToggler";
-import React from "react";
+import React, { Suspense } from "react";
 import SearchResults from "@/components/SearchResults";
 import { ThemeChanger } from "@/components/theme-changer";
 import SearchForm from "./SearchForm";
+import LoadingText from "./loaders/LoadingText";
+import { generateRandomId } from "@/lib/utils";
 
-const HomePage = () => {
+const HomePage = async ({searchParams} : {searchParams : Promise<{search? : string}>}) => {
+  const params = await searchParams
+  const query = params.search
   return (
     <div className="w-screen h-dvh flex bg-secondary/40 items-center justify-center">
       <div className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg">
@@ -22,7 +26,9 @@ const HomePage = () => {
         </div>
         <SearchForm />
         <div className="overflow-auto items-start justify-center h-full flex w-full gap-4 flex-wrap mt-4">
-            <SearchResults />
+          <Suspense key={generateRandomId(4)} fallback = {<LoadingText />}>
+            <SearchResults query={query} />
+          </Suspense>
         </div>
       </div>
     </div>

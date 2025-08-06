@@ -12,7 +12,8 @@ import { CirclePlay, PauseCircle, Download } from "lucide-react";
 import Spinner from "@/app/loaders/Spinner";
 import { cn } from "@/lib/utils";
 import { decode } from "he";
-import { FFmpeg } from "@ffmpeg/ffmpeg"; // Import FFmpeg.js for audio conversion
+import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { audioManager } from "./hooks/audioManager";
 
 interface PlayCardProps {
   id: string;
@@ -85,64 +86,96 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
   }, [apiUrl]);
 
   // Play/pause logic (minor tweaks for efficiency)
-  const handlePlayback = useCallback(async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) {
-      audio.pause();
-      setPlaying(false);
-      return;
-    }
-    if (audio.src && !error) {
+const handlePlayback = useCallback(async () => {
+  const audio = audioRef.current;
+  if (!audio) return;
+
+  // Handle pause/stop
+  if (isPlaying) {
+    audio.pause();
+    audioManager.stopCurrent();
+    setPlaying(false);
+    return;
+  }
+
+  // Helper function for audio loading
+  const loadAudioSource = async () => {
+    const result = await fetchAudioUrl();
+    if (!result) throw new Error('Failed to fetch audio');
+
+    const { url, songName } = result;
+    setAudioUrl(url);
+    audio.src = url;
+
+    // Wait for audio to be ready
+    await new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        clearTimeout(loadTimeout);
+        audio.removeEventListener('canplay', onCanPlay);
+        audio.removeEventListener('error', onError);
+      };
+
+      const onCanPlay = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = () => {
+        cleanup();
+        reject(new Error('Audio failed to load'));
+      };
+
+      const loadTimeout = setTimeout(() => {
+        cleanup();
+        reject(new Error('Audio loading timed out'));
+      }, AUDIO_LOAD_TIMEOUT);
+
+      audio.addEventListener('canplay', onCanPlay);
+      audio.addEventListener('error', onError);
+    });
+
+    return songName;
+  };
+
+  // Play audio
+  const playAudio = async () => {
+    let songName = videoTitle; // fallback
+
+    // Load new audio source if needed
+    if (!audio.src || error) {
+      setLoading(true);
       try {
-        await audio.play();
-        setPlaying(true);
+        songName = await loadAudioSource();
       } catch (err) {
-        toast.error("Failed to resume playback");
-        console.error("Playback error:", err);
-        setError("Playback failed");
+        throw new Error(
+          `Failed to load audio: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      } finally {
+        setLoading(false);
       }
-      return;
     }
-    setLoading(true);
-    try {
-      const result = await fetchAudioUrl();
-      if (result && audio) {
-        const { url, songName } = result;
-        setAudioUrl(url);
-        audio.src = url;
-        const loadTimeout = setTimeout(() => {
-          toast.error("Audio loading timed out");
-          setLoading(false);
-        }, AUDIO_LOAD_TIMEOUT);
-        await new Promise<void>((resolve, reject) => {
-          const onCanPlay = () => {
-            clearTimeout(loadTimeout);
-            audio.removeEventListener("canplay", onCanPlay);
-            audio.removeEventListener("error", onError);
-            resolve();
-          };
-          const onError = () => {
-            clearTimeout(loadTimeout);
-            audio.removeEventListener("canplay", onCanPlay);
-            audio.removeEventListener("error", onError);
-            reject(new Error("Audio failed to load"));
-          };
-          audio.addEventListener("canplay", onCanPlay);
-          audio.addEventListener("error", onError);
-        });
-        await audio.play();
-        setPlaying(true);
-        toast.success(`Now playing: ${decode(songName)}`);
-      }
-    } catch (err) {
-      toast.error("Failed to play audio");
-      console.error("Playback error:", err);
-      setError("Playback failed");
-    } finally {
-      setLoading(false);
-    }
-  }, [isPlaying, fetchAudioUrl, error]);
+
+    // Set as current and play
+    audioManager.setCurrentAudio(id, audio);
+    await audio.play();
+    setPlaying(true);
+    toast.success(`Now playing: ${decode(songName)}`);
+  };
+
+  // Execute play with error handling
+  try {
+    await playAudio();
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : 'Failed to play audio';
+    toast.error(errorMessage);
+    console.error('Playback error:', err);
+    setError('Playback failed');
+    audioManager.stopCurrent();
+  }
+}, [isPlaying, fetchAudioUrl, error, id, videoTitle]);
 
   // Effect for playback/cleanup (unchanged)
   useEffect(() => {
@@ -290,7 +323,6 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
       downloadDisabled: isLoading,
       playButtonClass: cn(
         "transition-colors duration-200",
-        isPlaying && "bg-green-600 hover:bg-green-500"
       ),
       playIcon: isLoading ? (
         <Spinner />
@@ -304,7 +336,6 @@ const PlayCard: React.FC<PlayCardProps> = ({ id, videoTitle, album }) => {
     [isLoading, isPlaying]
   );
 
-  // Removed unnecessary useMemo for DownloadButton (minor optimization)
   const DownloadButton = (
     <Button
       size={"sm"}

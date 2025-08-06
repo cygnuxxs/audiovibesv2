@@ -1,9 +1,7 @@
 import { ModeToggle } from "@/components/DarkModeToggler";
-import React, { Suspense } from "react";
-import LoadingText from "./loaders/LoadingText";
+import React from "react";
 import SearchResults from "@/components/SearchResults";
 import { ThemeChanger } from "@/components/theme-changer";
-import { generateRandomId } from "@/lib/utils";
 import SearchForm from "./SearchForm";
 
 const HomePage = () => {
@@ -24,9 +22,7 @@ const HomePage = () => {
         </div>
         <SearchForm />
         <div className="overflow-auto items-start justify-center h-full flex w-full gap-4 flex-wrap mt-4">
-          <Suspense key={generateRandomId(4)} fallback={<LoadingText />}>
             <SearchResults />
-          </Suspense>
         </div>
       </div>
     </div>

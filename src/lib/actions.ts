@@ -1,7 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 
 // Define constants for magic strings and configuration
 const API_BASE_URL = process.env.SAAVN_API_URL || "https://saavn.dev/api";
@@ -43,10 +41,3 @@ export const searchSongs = async (searchQuery : string | undefined) => {
     return [];
   }
 };
-
-export async function setQuerySong(formData : FormData) {
-  const songName = formData.get('song-name')
-  if (songName) {
-    redirect(`/?search=${encodeURIComponent(songName.toString())}`)
-  }
-}

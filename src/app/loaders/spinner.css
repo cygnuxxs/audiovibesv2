@@ -1,15 +1,14 @@
-/* From Uiverse.io by Cornerstone-04 */ 
-.loader {
-  width: 16px;
-  height: 16px;
-  border: 2px solid #1c47d450;
-  border-top-color: var(--primary);
-  animation: spin013151 1s linear infinite;
-  border-radius: 100%;
-}
-
-@keyframes spin013151 {
-  to {
-    transform: rotate(360deg);
+@keyframes spectrum-wave {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  25% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.6);
+  }
+  75% {
+    transform: scaleY(0.8);
   }
 }

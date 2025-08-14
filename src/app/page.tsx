@@ -4,7 +4,10 @@ import SearchResults from "@/components/SearchResults";
 import { ThemeChanger } from "@/components/theme-changer";
 import SearchForm from "./SearchForm";
 
-const HomePage = () => {
+
+const HomePage = async ({searchParams} : {searchParams : Promise<{q? : string}>}) => {
+  const query = (await searchParams).q
+
   return (
     <div className="w-screen h-dvh flex bg-secondary/40 items-center justify-center">
       <div className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg">
@@ -22,7 +25,7 @@ const HomePage = () => {
         </div>
         <SearchForm />
         <div className="overflow-auto items-start justify-center h-full flex w-full gap-4 flex-wrap mt-4">
-            <SearchResults />
+            <SearchResults query = {query} />
         </div>
       </div>
     </div>

@@ -19,7 +19,7 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           height={200}
           width={200}
           alt={song.name}
-          priority
+          loading="lazy"
         />
       <div className="flex flex-col gap-2">
         <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>

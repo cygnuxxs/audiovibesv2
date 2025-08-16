@@ -39,7 +39,7 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           {artistImageUrl?.url && (
             <Image
               className="rounded-full"
-              src={artistImageUrl?.url ?? "/profile-circle.png"}
+              src={song.artists?.primary[0].image.at(-1)?.url ?? "/profile-circle.png"}
               height={25}
               width={25}
               alt={song.artists?.primary[0]?.name}

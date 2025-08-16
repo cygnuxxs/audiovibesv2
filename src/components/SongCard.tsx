@@ -70,7 +70,7 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           </p>
         </div>
         <div className="flex gap-2">
-          <PlayCard videoTitle={decode(song.name)} id={song.id} album={song.album.name as string} />
+          <PlayCard song={song} />
         </div>
       </div>
     </div>

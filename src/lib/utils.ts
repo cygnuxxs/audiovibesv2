@@ -1,4 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
+import MP3Tag from "mp3tag.js";
+import { MP3TagAPICFrame } from "mp3tag.js/types/id3v2/frames";
 import internal from "stream";
 import { twMerge } from "tailwind-merge";
 
@@ -283,14 +285,19 @@ const cookies = [
   },
 ];
 
-export const sanitizedCookies = cookies.map(cookie => ({
+export const sanitizedCookies = cookies.map((cookie) => ({
   ...cookie,
-  sameSite: cookie.sameSite === null ? undefined : cookie.sameSite
+  sameSite: cookie.sameSite === null ? undefined : cookie.sameSite,
 }));
 
-
-export const formatDuration = (totalSeconds: number | null | undefined): string => {
-  if (typeof totalSeconds !== 'number' || totalSeconds < 0 || !isFinite(totalSeconds)) {
+export const formatDuration = (
+  totalSeconds: number | null | undefined
+): string => {
+  if (
+    typeof totalSeconds !== "number" ||
+    totalSeconds < 0 ||
+    !isFinite(totalSeconds)
+  ) {
     return "0m 0s";
   }
   const minutes = Math.floor(totalSeconds / 60);
@@ -298,12 +305,98 @@ export const formatDuration = (totalSeconds: number | null | undefined): string 
   return `${minutes}m ${seconds}s`;
 };
 
-
 export function generateRandomId(length: number = 4): string {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
 }
+
+export const addSongMetadata = async (
+  buffer: ArrayBuffer,
+  song: Song
+) => {
+  /* ---------- 1.  initialise mp3tag.js --------------------------- */
+  const mp3tag = new MP3Tag(buffer);
+  mp3tag.read();
+  if (mp3tag.error) throw new Error(`Metadata read error: ${mp3tag.error}`);
+
+  /* ---------- 2.  build standard & custom frames ---------------- */
+  const commFrame = {
+    descriptor: "Explicit Content",
+    text: song.explicitContent ? "Yes" : "No",
+    language: song.language,
+  };
+
+  const txxxFrames = [
+    { description: "ID", text: song.id },
+    { description: "PlayCount", text: song.playCount?.toString() || "" },
+    { description: "HasLyrics", text: song.hasLyrics ? "Yes" : "No" },
+    { description: "LyricsID", text: song.lyricsId || "" },
+    { description: "URL", text: song.url },
+  ];
+
+  /* ---------- 3.  optional album-art image (APIC) ---------------- */
+  let apicFrames: MP3TagAPICFrame[] | undefined;
+  const coverUrl = song.image.at(-1)?.url;
+  if (coverUrl) {
+    try {
+      const res = await fetch(coverUrl, { mode: "cors" });
+      if (res.ok) {
+        const imgBuf = Array.from(new Uint8Array(await res.arrayBuffer()));
+        apicFrames = [
+          {
+            type: 3, // front cover
+            data: imgBuf,
+            description: "Album Art",
+            format: res.headers.get("Content-Type") || "image/jpeg",
+          },
+        ];
+      }
+    } catch (e) {
+      console.warn("Album-art fetch failed:", e);
+    }
+  }
+
+  /* ---------- 4.  ensure v2Details exists ------------------------ */
+  const existingV2 = mp3tag.tags;
+
+  /* ---------- 5.  assemble final tag object --------------------- */
+  mp3tag.tags.v2 = {
+    ...existingV2, // preserve any old frames
+    TIT2: song.name,
+    TPE1: song.artists.primary.map((a) => a.name).join(", "),
+    TALB: song.album.name as string,
+    TDRC: song.year?.toString() || "",
+    TDRL: song.releaseDate || "",
+    TLEN: song.duration ? `${song.duration * 1_000}` : "",
+    TPUB: song.label || "",
+    TCON: song.language,
+    TLAN: song.language,
+    COMM: [commFrame],
+    TXXX: txxxFrames,
+    ...(apicFrames ? { APIC: apicFrames } : {}),
+  };
+
+  /* ---------- 6.  save & return updated buffer ------------------ */
+  mp3tag.save(); // ID3v2.3
+  if (mp3tag.error) throw new Error(`Metadata save error: ${mp3tag.error}`);
+
+  const savedBuffer = new Uint8Array(mp3tag.buffer);
+  return savedBuffer
+};
+
+
+export const downloadBlob = (blob: Blob, filename: string) => {
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
+};

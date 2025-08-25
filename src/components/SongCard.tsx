@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { formatDuration, formatViews } from "@/lib/utils";
-import PlayCard from "./PlayCard";
+import dynamic from "next/dynamic";
 import { decode } from "he";
+
+const PlayCard = dynamic(() => import("./PlayCard"), {ssr : false});
 
 const SongCard: React.FC<{ song: Song }> = ({ song }) => {
   const highestImageUrl = song.image[song.image.length - 1]?.url;
@@ -19,7 +21,7 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           height={200}
           width={200}
           alt={song.name}
-          loading="lazy"
+          loading="eager"
         />
       <div className="flex flex-col gap-2">
         <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>

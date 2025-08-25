@@ -1,12 +1,15 @@
 import { ModeToggle } from "@/components/DarkModeToggler";
 import React from "react";
-import SearchResults from "@/components/SearchResults";
 import { ThemeChanger } from "@/components/theme-changer";
 import SearchForm from "./SearchForm";
+import SearchResults from "@/components/SearchResults";
 
-
-const HomePage = async ({searchParams} : {searchParams : Promise<{q? : string}>}) => {
-  const query = (await searchParams).q
+const HomePage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) => {
+  const query = (await searchParams).q;
 
   return (
     <div className="w-screen h-dvh flex bg-secondary/40 items-center justify-center">
@@ -25,7 +28,7 @@ const HomePage = async ({searchParams} : {searchParams : Promise<{q? : string}>}
         </div>
         <SearchForm />
         <div className="overflow-auto items-start justify-center h-full flex w-full gap-4 flex-wrap mt-4">
-            <SearchResults query = {query} />
+          <SearchResults query={query} />
         </div>
       </div>
     </div>

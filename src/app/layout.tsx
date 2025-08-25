@@ -4,14 +4,14 @@ import "./globals.css";
 // import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import ThemeDataProvider from "@/components/hooks/theme-color-provider";
-import type { Metadata } from "next";
+import Script from "next/script";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   metadataBase: new URL("https://audiovibes.vercel.app"),
   title: {
     default: "Audiovibes",
@@ -93,8 +93,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="application-name" content="AudioVibes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="AudioVibes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         {/* JSON-LD Structured Data for Google Logo & Org */}
-        <script
+        <Script id="audiovibes-script"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
@@ -118,6 +125,27 @@ export default function RootLayout({
             <Toaster />
           </ThemeDataProvider>
         </ThemeProvider>
+
+        <Script
+          id="register-sw"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('Service Worker registration successful');
+                    },
+                    function(err) {
+                      console.log('Service Worker registration failed: ', err);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
 
         {/* Google AdSense */}
         {/* <Script

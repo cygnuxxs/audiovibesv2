@@ -2,73 +2,75 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AudioVibes v2 By Cygnuxxs",
+    name: "AudioVibes - Music Downloader",
     short_name: "AudioVibes",
     description:
       "Discover, fetch, and download high-quality songs from JioSaavn at 320kbps. Owned and developed by Cygnuxxs for music enthusiasts.",
-    start_url: "/",
     id: "/",
+    start_url: "/",
+    scope: "/",
     display: "standalone",
-    display_override: ["standalone", "browser"],
-    theme_color: "#ffffff",
+    display_override: ["standalone", "minimal-ui", "browser"],
+    launch_handler: {
+      client_mode: ["navigate-existing", "auto"]
+    },
+    theme_color: "#000000",
     background_color: "#000000",
     orientation: "portrait",
-    scope: "/",
-    prefer_related_applications: false,
     categories: ["entertainment", "music"],
+    prefer_related_applications: false,
+    icons: [
+      {
+        src: "/web-app-manifest-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any"
+      },
+      {
+        src: "/web-app-manifest-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable"
+      },
+      {
+        src: "/web-app-manifest-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any"
+      },
+      {
+        src: "/web-app-manifest-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable"
+      },
+    ],
     screenshots: [
       {
         src: "/images/ss1.png",
         sizes: "2560x1424",
         type: "image/png",
+        form_factor : "wide",
         label: "AudioVibes v2 Home Screen",
-        form_factor: "wide",
       },
       {
         src: "/images/mss1.png",
         sizes: "796x1424",
+        form_factor : "narrow",
         type: "image/png",
-        label: "Audiovibes mobile home screen",
+        label: "AudioVibes Mobile Home Screen",
       },
       {
         src: "/images/ss2.png",
         sizes: "2560x1424",
         type: "image/png",
         label: "AudioVibes v2 Loading Screen",
-        form_factor: "wide",
       },
       {
         src: "/images/ss3.png",
         sizes: "2560x1424",
         type: "image/png",
         label: "AudioVibes v2 Player Screen",
-        form_factor: "wide",
-      },
-    ],
-    icons: [
-      {
-        src: "/web-app-manifest-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "maskable",
-      },
-      {
-        src: "/web-app-manifest-192x192.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/web-app-manifest-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/web-app-manifest-512x512.png",
-        sizes: "512x512",
-        type: "image/png",
-        purpose: "maskable",
       },
     ],
   };

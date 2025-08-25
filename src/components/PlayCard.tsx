@@ -1,6 +1,6 @@
 'use client'
 import React, {useState, useMemo, useCallback} from 'react'
-import useSongAudioFetcher from './hooks/useSongAudioFetcher';
+import useSongAudioFetcher from './hooks/useSongAudioFetcher'
 import { decode } from 'he';
 import {toast} from 'sonner'
 import useFFmpeg from './hooks/useFfmpeg';

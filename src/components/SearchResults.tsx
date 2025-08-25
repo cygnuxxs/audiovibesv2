@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState, useTransition } from "react";
-import SongCard from "./SongCard";
 import { searchSongs } from "@/lib/actions";
-import MusicSpectrumLoader from "@/app/loaders/Spinner";
+const MusicSpectrumLoader = dynamic(() => import("@/app/loaders/Spinner"), {ssr : false});
+import dynamic from "next/dynamic";
+const SongCard = dynamic(() => import('./SongCard'), {ssr : false})
 
 export const revalidate = 3600;
 

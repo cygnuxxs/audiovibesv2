@@ -1,6 +1,7 @@
 'use client'
 import { useRef, useCallback, useState, useEffect } from "react";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
+import type { FFmpeg } from '@ffmpeg/ffmpeg';
+
 export default function useFFmpeg() {
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const [isFFmpegLoading, setIsFFmpegLoading] = useState(false);
@@ -12,6 +13,7 @@ export default function useFFmpeg() {
     setIsFFmpegLoading(true);
     setFFmpegError(null);
     try {
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
       const ffmpeg = new FFmpeg();
       await ffmpeg.load();
       ffmpegRef.current = ffmpeg;

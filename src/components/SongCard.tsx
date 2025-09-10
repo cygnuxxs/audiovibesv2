@@ -1,30 +1,44 @@
+"use client";
 import { Clock, Disc, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { formatDuration, formatViews } from "@/lib/utils";
+import React, { useState, useEffect } from "react";
+import { cn, formatDuration, formatViews, getColors } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { decode } from "he";
+import { useTheme } from "next-themes";
 
-const PlayCard = dynamic(() => import("./PlayCard"), {ssr : false});
+const PlayCard = dynamic(() => import("./PlayCard"), { ssr: false });
 
 const SongCard: React.FC<{ song: Song }> = ({ song }) => {
+  const defaultColors = ["#2a2a2a", "#1a1a1a", "#0a0a0a"];
   const highestImageUrl = song.image[song.image.length - 1]?.url;
   const artistImageUrl =
     song.artists.primary[song.artists.primary.length - 1]?.image.at(-1);
 
+  const [data, setData] = useState<(string | null)[]>(defaultColors);
+  useEffect(() => {
+    getColors(highestImageUrl).then((d) => setData(d));
+  }, [highestImageUrl]);
+
+  const {resolvedTheme} = useTheme()
   return (
-    <div className="flex flex-1 sm:min-w-120 items-center gap-3 p-0">
-        <Image
-          className="object-cover rounded-md max-sm:max-w-32 max-sm:h-auto"
-          src={highestImageUrl}
-          height={200}
-          width={200}
-          alt={song.name}
-          loading="eager"
-        />
+    <div
+    style={{backgroundImage : resolvedTheme === 'dark' ? `linear-gradient(90deg, ${data[1]} 45%, ${data[0]} 75%, ${data[2]} 100%)` : `inherit`}}
+      className={cn("flex flex-1 sm:min-w-120 rounded-xl items-center gap-3 p-0")}
+    >
+      <Image
+        className="object-cover rounded-md max-sm:max-w-32 max-sm:h-auto"
+        src={highestImageUrl}
+        height={200}
+        width={200}
+        alt={song.name}
+        loading="eager"
+      />
       <div className="flex flex-col gap-2">
-        <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>
+        <h2 className="text-base text-ellipsis font-bold">
+          {decode(song.name)}
+        </h2>
         <Link
           target="_blank"
           className="text-[0.6rem] text-muted-foreground bg-muted hover:text-primary font-bold rounded-full w-fit p-1"
@@ -41,7 +55,10 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           {artistImageUrl?.url && (
             <Image
               className="rounded-full"
-              src={song.artists?.primary[0].image.at(-1)?.url ?? "/profile-circle.png"}
+              src={
+                song.artists?.primary[0].image.at(-1)?.url ??
+                "/profile-circle.png"
+              }
               height={25}
               width={25}
               alt={song.artists?.primary[0]?.name}
@@ -57,12 +74,12 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
             {formatDuration(song.duration)}
           </p>
           {song.playCount && (
-<p className="bg-muted px-1 flex gap-1 items-center rounded-md">
-            <span>
-              <Disc size={"14px"} />
-            </span>
-            {formatViews(song.playCount as number)}
-          </p>
+            <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
+              <span>
+                <Disc size={"14px"} />
+              </span>
+              {formatViews(song.playCount as number)}
+            </p>
           )}
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>

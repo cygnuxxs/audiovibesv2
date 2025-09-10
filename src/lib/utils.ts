@@ -3,6 +3,7 @@ import MP3Tag from "mp3tag.js";
 import { MP3TagAPICFrame } from "mp3tag.js/types/id3v2/frames";
 import internal from "stream";
 import { twMerge } from "tailwind-merge";
+import { Vibrant } from "node-vibrant/browser";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -315,10 +316,7 @@ export function generateRandomId(length: number = 4): string {
   return result;
 }
 
-export const addSongMetadata = async (
-  buffer: ArrayBuffer,
-  song: Song
-) => {
+export const addSongMetadata = async (buffer: ArrayBuffer, song: Song) => {
   /* ---------- 1.  initialise mp3tag.js --------------------------- */
   const mp3tag = new MP3Tag(buffer);
   mp3tag.read();
@@ -386,9 +384,8 @@ export const addSongMetadata = async (
   if (mp3tag.error) throw new Error(`Metadata save error: ${mp3tag.error}`);
 
   const savedBuffer = new Uint8Array(mp3tag.buffer);
-  return savedBuffer
+  return savedBuffer;
 };
-
 
 export const downloadBlob = (blob: Blob, filename: string) => {
   const blobUrl = URL.createObjectURL(blob);
@@ -399,4 +396,21 @@ export const downloadBlob = (blob: Blob, filename: string) => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(blobUrl);
+};
+
+const formatHsl = (hsl: number[] | undefined): string | null => {
+  if (!hsl) return null;
+  const [h, s, l] = hsl;
+  // Format to hsl(hue, saturation%, lightness%)
+  return `hsl(${h * 360} ${s * 100}% ${l * 100}% / 0.8)`;
+};
+
+export const getColors = async (imageUrl: string) => {
+  const palette = await Vibrant.from(imageUrl).getPalette().then((palette)=> {
+    const vibrantColor = formatHsl(palette.Vibrant?.hsl);
+    const darkMutedColor = formatHsl(palette.DarkMuted?.hsl);
+    const lightMutedColor = formatHsl(palette.LightMuted?.hsl);
+    return [vibrantColor, darkMutedColor, lightMutedColor];
+  });
+  return palette
 };

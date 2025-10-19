@@ -1,6 +1,5 @@
 'use client'
 import React, {useState, useMemo, useCallback} from 'react'
-import useSongAudioFetcher from './hooks/useSongAudioFetcher'
 import { decode } from 'he';
 import {toast} from 'sonner'
 import useFFmpeg from './hooks/useFfmpeg';
@@ -11,14 +10,11 @@ import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
 
 const PlayCard = ({ song }: { song: Song }) => {
-  const { id, name, album } = song;
+  const { id, title, album } = song;
 
   const [isProcessingDownload, setIsProcessingDownload] = useState(false);
   const [audioSrcUrl, setAudioSrcUrl] = useState<string | null>(null); // To store the fetched URL for download reuse
-
-  // Use custom hooks
-  const { fetchAudioUrl } = useSongAudioFetcher(id);
-  const { audioRef, isPlaying, isLoadingAudio, togglePlayback } = useAudioPlayer(id, name);
+  const { audioRef, isPlaying, isLoadingAudio, togglePlayback } = useAudioPlayer(id, title, song.downloadUrl);
   const {loadFFmpeg, isFFmpegLoading, ffmpegError } = useFFmpeg();
 
 
@@ -28,12 +24,7 @@ const PlayCard = ({ song }: { song: Song }) => {
 
     try {
       if (!currentAudioUrl) {
-        // Fetch URL if not available
-        const result = await fetchAudioUrl();
-        if (!result) {
-          throw new Error("Failed to load audio URL for download.");
-        }
-        currentAudioUrl = result.url;
+        currentAudioUrl = song.downloadUrl;
         setAudioSrcUrl(currentAudioUrl); // Store it for future use
       }
 
@@ -47,7 +38,7 @@ const PlayCard = ({ song }: { song: Song }) => {
       }
 
       toast.info("Downloading and converting audio...", { duration: 5000 });
-
+      console.log(currentAudioUrl)
       const response = await fetch(currentAudioUrl, { mode: "cors" });
       if (!response.ok) {
         throw new Error(`Failed to fetch audio stream: ${response.status}`);
@@ -55,7 +46,7 @@ const PlayCard = ({ song }: { song: Song }) => {
       const arrayBuffer = await response.arrayBuffer();
 
       const inputFileName = "input.audio";
-      const outputFileName = `${decode(name)} - ${decode(album.name || 'Unknown Album')}.mp3`;
+      const outputFileName = `${decode(title)} - ${decode(album || 'Unknown Album')}.mp3`;
 
       // Write to FFmpeg FS
       loadedFFmpeg.writeFile(inputFileName, new Uint8Array(arrayBuffer));
@@ -95,7 +86,7 @@ const PlayCard = ({ song }: { song: Song }) => {
     } finally {
       setIsProcessingDownload(false);
     }
-  }, [audioSrcUrl, name, album, song, fetchAudioUrl, loadFFmpeg, ffmpegError]);
+  }, [audioSrcUrl, title, album, song, loadFFmpeg, ffmpegError]);
 
 
   const isBusy = isLoadingAudio || isProcessingDownload || isFFmpegLoading;
@@ -131,7 +122,7 @@ const PlayCard = ({ song }: { song: Song }) => {
           onClick={togglePlayback}
           disabled={isBusy}
           className={cn("transition-colors duration-200")}
-          aria-label={`${isPlaying ? "Pause" : "Play"} ${name}`}
+          aria-label={`${isPlaying ? "Pause" : "Play"} ${title}`}
         >
           {PlayButtonContent}
         </Button>
@@ -141,7 +132,7 @@ const PlayCard = ({ song }: { song: Song }) => {
           disabled={isBusy}
           variant="outline"
           className="flex items-center gap-2"
-          aria-label={`Download ${name}`}
+          aria-label={`Download ${title}`}
         >
           {isProcessingDownload ? <SmallSpinner /> : <Download className="w-5 h-5" />}
           <span className="ml-2">{isProcessingDownload ? "Processing..." : "Download"}</span>

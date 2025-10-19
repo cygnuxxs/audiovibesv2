@@ -2,16 +2,15 @@
 
 
 // Define constants for magic strings and configuration
-const API_BASE_URL = process.env.SAAVN_API_URL || "https://saavn.dev/api";
-const DEFAULT_QUERY = "telugu";
+const DEFAULT_QUERY = "telugu songs";
 const SEARCH_LIMIT = 25;
 const CACHE_REVALIDATION_TIME = 3600; // In seconds (1 hour)
 
 export const searchSongs = async (searchQuery : string | undefined) => {
     const songName = searchQuery ? searchQuery : DEFAULT_QUERY
 
-  const searchUrl = `${API_BASE_URL}/search/songs?query=${encodeURIComponent(songName)}&limit=${SEARCH_LIMIT}`;
-
+const searchUrl = `${process.env.PUBLIC_URL}/api/search?query=${encodeURIComponent(songName)}&limit=${SEARCH_LIMIT}&type=songs`;
+  
   try {
     const response = await fetch(searchUrl, {
       // Next.js specific caching strategy
@@ -25,12 +24,8 @@ export const searchSongs = async (searchQuery : string | undefined) => {
       throw new Error(`Failed to fetch songs. Status: ${response.status} ${response.statusText}`);
     }
 
-    const result = await response.json();
-
-    // Safely access the data and ensure we always return an array
-    // The Saavn.dev API nests the results under `data.results` or `data.songs`
-    const songs : Song[] = result?.data?.songs || result?.data?.results || [];
-    return songs ;
+    const songs : Song[] = await response.json();
+    return songs
 
   } catch (error) {
     // Catch fetch errors (e.g., network issues) or JSON parsing errors

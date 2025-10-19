@@ -1,10 +1,9 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-// import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
-import ThemeDataProvider from "@/components/hooks/theme-color-provider";
 import Script from "next/script";
+import { ActiveThemeProvider } from "@/components/active-theme";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -118,12 +117,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${montserrat.className} antialiased`}>
+      <body className={`${montserrat.className} theme-container antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ThemeDataProvider>
+          <ActiveThemeProvider>
             {children}
             <Toaster />
-          </ThemeDataProvider>
+            </ActiveThemeProvider>
         </ThemeProvider>
 
         <Script

@@ -1,6 +1,6 @@
 import { ModeToggle } from "@/components/DarkModeToggler";
 import React from "react";
-import { ThemeChanger } from "@/components/theme-changer";
+import ThemeChanger from "@/components/theme-color-toggler";
 import SearchForm from "./SearchForm";
 import SearchResults from "@/components/SearchResults";
 

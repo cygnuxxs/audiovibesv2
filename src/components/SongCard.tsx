@@ -9,9 +9,8 @@ import { decode } from "he";
 const PlayCard = dynamic(() => import("./PlayCard"), {ssr : false});
 
 const SongCard: React.FC<{ song: Song }> = ({ song }) => {
-  const highestImageUrl = song.image[song.image.length - 1]?.url;
-  const artistImageUrl =
-    song.artists.primary[song.artists.primary.length - 1]?.image.at(-1);
+  const highestImageUrl = song.image;
+  const artistImageUrl = song.primary_artist_image;
 
   return (
     <div className="flex flex-1 sm:min-w-120 items-center gap-3 p-0">
@@ -20,48 +19,49 @@ const SongCard: React.FC<{ song: Song }> = ({ song }) => {
           src={highestImageUrl}
           height={200}
           width={200}
-          alt={song.name}
+          alt={song.title}
           loading="eager"
+          priority
         />
       <div className="flex flex-col gap-2">
-        <h2 className="text-base text-ellipsis font-bold">{decode(song.name)}</h2>
+        <h2 className="text-base text-ellipsis font-bold">{decode(song.title)}</h2>
         <Link
           target="_blank"
           className="text-[0.6rem] text-muted-foreground bg-muted hover:text-primary font-bold rounded-full w-fit p-1"
-          href={song.album?.url ?? "#"}
+          href={song.album_url ?? "#"}
         >
-          From {decode(song.album?.name as string)}
+          From {decode(song.album as string)}
         </Link>
         <Link
           className="flex gap-2 text-xs items-center text-muted-foreground bg-muted w-fit rounded-full hover:text-primary font-bold"
           target="_blank"
           rel="noopener noreferrer"
-          href={song.url || "#"}
+          href={song.album_url || "#"}
         >
-          {artistImageUrl?.url && (
+          {artistImageUrl && (
             <Image
               className="rounded-full"
-              src={song.artists?.primary[0].image.at(-1)?.url ?? "/profile-circle.png"}
+              src={artistImageUrl ?? "/profile-circle.png"}
               height={25}
               width={25}
-              alt={song.artists?.primary[0]?.name}
+              alt={song.primary_artist_name as string}
             />
           )}
-          <span className="pr-2">{song.artists?.primary[0]?.name}</span>
+          <span className="pr-2">{song.primary_artist_name}</span>
         </Link>
         <div className="flex flex-wrap text-xs font-medium text-muted-foreground gap-2">
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Clock size={"14px"} />
             </span>
-            {formatDuration(song.duration)}
+            {formatDuration(parseInt(song.duration,10))}
           </p>
-          {song.playCount && (
+          {song.play_count && (
 <p className="bg-muted px-1 flex gap-1 items-center rounded-md">
             <span>
               <Disc size={"14px"} />
             </span>
-            {formatViews(song.playCount as number)}
+            {formatViews(song.play_count as number)}
           </p>
           )}
           <p className="bg-muted px-1 flex gap-1 items-center rounded-md">

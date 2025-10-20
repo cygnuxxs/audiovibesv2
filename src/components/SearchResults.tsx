@@ -10,7 +10,7 @@ export const revalidate = 3600;
 const SearchResults = ({ query }: { query?: string }) => {
   const [data, setData] = useState<Song[]>([]);
   const [isPending, startTransition] = useTransition();
-
+  
   useEffect(() => {
     startTransition(async () => {
       try {

@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: 'Failed to fetch data from external API' }, { status: response.status });
+      return NextResponse.json({ error: 'Failed to fetch data from external API', message : response.statusText }, { status: response.status });
     }
 
     const data : SearchSong = await response.json();

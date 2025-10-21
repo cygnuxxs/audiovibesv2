@@ -1,5 +1,5 @@
 'use client'
-import React, {useState, useMemo, useCallback} from 'react'
+import React, {useState, useMemo, useCallback, useTransition} from 'react'
 import { decode } from 'he';
 import {toast} from 'sonner'
 import useFFmpeg from './hooks/useFfmpeg';
@@ -8,6 +8,7 @@ import useAudioPlayer from './hooks/useAudioPlayer';
 import { PauseCircle, CirclePlay, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
+import { incrementDownloads } from '@/lib/actions';
 
 const PlayCard = ({ song }: { song: Song }) => {
   const { id, title, album } = song;
@@ -16,10 +17,11 @@ const PlayCard = ({ song }: { song: Song }) => {
   const [audioSrcUrl, setAudioSrcUrl] = useState<string | null>(null); // To store the fetched URL for download reuse
   const { audioRef, isPlaying, isLoadingAudio, togglePlayback } = useAudioPlayer(id, title, song.downloadUrl);
   const {loadFFmpeg, isFFmpegLoading, ffmpegError } = useFFmpeg();
-
+  const [isPending, startTransition] = useTransition()
 
   const handleDownload = useCallback(async () => {
     setIsProcessingDownload(true);
+
     let currentAudioUrl = audioSrcUrl; // Prefer already fetched URL
 
     try {
@@ -77,7 +79,7 @@ const PlayCard = ({ song }: { song: Song }) => {
       // Clean up FFmpeg files
       loadedFFmpeg.deleteFile(inputFileName);
       loadedFFmpeg.deleteFile(outputFileName);
-
+      startTransition(() => incrementDownloads())
       toast.success(`Downloaded: ${outputFileName}`);
     } catch (err) {
       console.error("Download/Conversion error:", err);
@@ -89,7 +91,7 @@ const PlayCard = ({ song }: { song: Song }) => {
   }, [audioSrcUrl, title, album, song, loadFFmpeg, ffmpegError]);
 
 
-  const isBusy = isLoadingAudio || isProcessingDownload || isFFmpegLoading;
+  const isBusy = isLoadingAudio || isProcessingDownload || isFFmpegLoading || isPending;
 
   const PlayButtonContent = useMemo(() => {
     if (isLoadingAudio) {

@@ -1,5 +1,6 @@
 "use server";
 
+import { supabase } from "@/lib/supabase";
 
 // Define constants for magic strings and configuration
 const DEFAULT_QUERY = "telugu songs";
@@ -36,3 +37,29 @@ const searchUrl = `${process.env.PUBLIC_URL}/api/search?query=${encodeURICompone
     return [];
   }
 };
+export async function incrementDownloads() {
+  const { data } = await supabase
+    .from("downloads")
+    .select("id, count")
+    .limit(1)
+    .single();
+  if (!data) {
+    // Create one if doesn't exist
+    const { data: created } = await supabase
+      .from("downloads")
+      .insert({ count: 1 })
+      .select()
+      .single();
+    return created;
+  }
+
+  // Increment count
+  const { data: updated } = await supabase
+    .from("downloads")
+    .update({ count: data.count + 1 })
+    .eq("id", data.id)
+    .select()
+    .single();
+
+  return updated;
+}

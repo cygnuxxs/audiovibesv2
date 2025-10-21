@@ -13,19 +13,31 @@ const montserrat = Montserrat({
 export const metadata = {
   metadataBase: new URL("https://audiovibes.vercel.app"),
   title: {
-    default: "Audiovibes",
-    template: "%s | Audiovibes",
+    default: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
+    template: "%s | AudioVibes - Premium Music Downloads",
   },
   description:
-    "Discover, fetch, and download high-quality songs from JioSaavn at 320kbps. Owned and developed by Cygnuxxs for music enthusiasts.",
+    "Download high-quality 320kbps MP3 songs from JioSaavn for free. AudioVibes is the ultimate music downloader for music enthusiasts seeking premium audio quality. Fast, easy, and reliable song downloads.",
   keywords: [
-    "Audiovibes",
-    "Cygnuxxs",
+    "AudioVibes",
     "music downloader",
     "download mp3",
-    "i love music",
-    "320kbps",
-    "music downloader",
+    "320kbps music",
+    "JioSaavn downloader",
+    "free music download",
+    "high quality music",
+    "mp3 songs download",
+    "online music downloader",
+    "Cygnuxxs",
+    "music streaming",
+    "audio downloader",
+    "song downloader",
+    "music player",
+    "download songs online",
+    "free mp3 downloader",
+    "high quality audio",
+    "music enthusiast",
+    "lossless audio",
   ],
   authors: [
     {
@@ -35,12 +47,19 @@ export const metadata = {
   ],
   creator: "Ashok Atragadda (Cygnuxxs)",
   publisher: "Ashok Atragadda (Cygnuxxs)",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
@@ -50,17 +69,17 @@ export const metadata = {
     canonical: "https://audiovibes.vercel.app",
   },
   openGraph: {
-    title: "AudioVibes v2 - High-Quality Song Downloads from JioSaavn",
+    title: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
     description:
-      "Fetch and download your favorite songs from JioSaavn in 320kbps quality. Built for seamless music experiences.",
+      "Download premium 320kbps MP3 songs from JioSaavn for free. Fast, easy, and high-quality music downloads for true music enthusiasts.",
     url: "https://audiovibes.vercel.app",
-    siteName: "AudioVibes v2",
+    siteName: "AudioVibes",
     images: [
       {
         url: "https://audiovibes.vercel.app/og-image.jpeg",
         width: 1200,
         height: 630,
-        alt: "AudioVibes v2 Banner",
+        alt: "AudioVibes - Premium Music Downloader Platform",
       },
     ],
     locale: "en_US",
@@ -68,10 +87,11 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AudioVibes v2 - Download Songs from JioSaavn",
-    description: "Get 320kbps song downloads from JioSaavn with AudioVibes v2.",
+    title: "AudioVibes - Free High-Quality Music Downloader",
+    description: "Download 320kbps MP3 songs from JioSaavn. Fast, free, and high-quality music downloads.",
     images: ["https://audiovibes.vercel.app/og-image.jpeg"],
-    creator: "@cygnuxxs", // optional if you have a Twitter handle
+    creator: "@cygnuxxs",
+    site: "@cygnuxxs",
   },
   icons: {
     icon: "/favicon.ico",
@@ -82,6 +102,8 @@ export const metadata = {
   verification: {
     google: "5t4zBjhovVUsu3rVsR2HSiuUOu6yqVbHSusUkSFdnjY",
   },
+  category: "Music & Entertainment",
+  classification: "Music Downloader",
 };
 
 export default function RootLayout({
@@ -99,20 +121,84 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#000000" />
         <link rel="manifest" href="/manifest.webmanifest" />
-        {/* JSON-LD Structured Data for Google Logo & Org */}
-        <Script id="audiovibes-script"
+        {/* Enhanced JSON-LD Structured Data for Better SEO */}
+        <Script 
+          id="organization-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Audiovibes",
+              name: "AudioVibes",
               url: "https://audiovibes.vercel.app",
-              logo: "https://audiovibes.vercel.app/logo.png", // make sure logo.png exists in /public
+              logo: "https://audiovibes.vercel.app/logo.png",
+              description: "Premium music downloader platform offering high-quality 320kbps MP3 downloads from JioSaavn",
+              foundingDate: "2024",
+              founder: {
+                "@type": "Person",
+                name: "Ashok Atragadda",
+                alternateName: "Cygnuxxs",
+                url: "https://linkedin.com/in/ashok-atragadda",
+              },
               sameAs: [
                 "https://linkedin.com/in/ashok-atragadda",
                 "https://github.com/cygnuxxs",
               ],
+            }),
+          }}
+        />
+        <Script 
+          id="website-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "AudioVibes",
+              url: "https://audiovibes.vercel.app",
+              description: "Download high-quality 320kbps MP3 songs from JioSaavn for free",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://audiovibes.vercel.app/?q={search_term_string}"
+                },
+                "query-input": "required name=search_term_string"
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "AudioVibes",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://audiovibes.vercel.app/logo.png"
+                }
+              }
+            }),
+          }}
+        />
+        <Script 
+          id="webapp-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "AudioVibes",
+              url: "https://audiovibes.vercel.app",
+              applicationCategory: "MultimediaApplication",
+              operatingSystem: "Any",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD"
+              },
+              description: "Free online music downloader for high-quality 320kbps MP3 songs from JioSaavn",
+              browserRequirements: "Requires JavaScript. Requires HTML5.",
+              softwareVersion: "2.0",
+              author: {
+                "@type": "Person",
+                name: "Ashok Atragadda"
+              }
             }),
           }}
         />

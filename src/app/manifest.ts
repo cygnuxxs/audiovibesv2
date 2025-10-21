@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AudioVibes - Music Downloader",
+    name: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3",
     short_name: "AudioVibes",
     description:
-      "Discover, fetch, and download high-quality songs from JioSaavn at 320kbps. Owned and developed by Cygnuxxs for music enthusiasts.",
+      "Download premium 320kbps MP3 songs from JioSaavn for free. Fast, high-quality music downloads for music enthusiasts. Built by Cygnuxxs.",
     id: "/",
     start_url: "/",
     scope: "/",
@@ -17,7 +17,7 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#000000",
     background_color: "#000000",
     orientation: "portrait",
-    categories: ["entertainment", "music"],
+    categories: ["entertainment", "music", "multimedia"],
     prefer_related_applications: false,
     icons: [
       {

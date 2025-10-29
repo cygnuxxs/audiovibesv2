@@ -27,7 +27,7 @@ export async function generateMetadata({
         description: `Find and download "${query}" in 320kbps quality.`,
       },
       alternates: {
-        canonical: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+        canonical: `https://audiovibes.vercel.app/`,
       },
     };
   }

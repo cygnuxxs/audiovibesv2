@@ -3,8 +3,9 @@
 import * as React from "react";
 import NumberFlow from "@number-flow/react";
 import { supabase } from "@/lib/supabase";
+import { DownloadIcon } from "lucide-react";
 
-export default function RealtimeDownloads({ label = "Downloads" }) {
+export default function RealtimeDownloads() {
   const [downloads, setDownloads] = React.useState(0);
 
   React.useEffect(() => {
@@ -52,7 +53,7 @@ export default function RealtimeDownloads({ label = "Downloads" }) {
   }, []);
 
   return (
-    <div className="flex items-center gap-2 w-full mx-auto">
+    <div className="flex items-center text-xs gap-2 w-full mx-auto">
       <NumberFlow
         value={downloads}
         locales="en-US"
@@ -62,9 +63,9 @@ export default function RealtimeDownloads({ label = "Downloads" }) {
           easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
         animated
-        className="tabular-nums text-2xl font-semibold tracking-tight text-primary truncate"
+        className="tabular-nums font-semibold tracking-tight text-primary truncate"
       />
-      <span className="text-xs text-muted-foreground truncate">{label}</span>
+      <span className="text-primary items-end truncate"><DownloadIcon size={14} /></span>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   const externalApiUrl = `https://www.jiosaavn.com/api.php?p=${jioSaavnParams.p}&q=${jioSaavnParams.q}&_format=${jioSaavnParams._format}&_marker=${jioSaavnParams._marker}&api_version=${jioSaavnParams.api_version}&ctx=${jioSaavnParams.ctx}&n=${jioSaavnParams.n}&__call=${jioSaavnParams.__call}`;
 
   try {
-    // Fetch data from JioSaavn API
+    // Fetch data from JioSaavn API with caching
     const response = await fetch(externalApiUrl, {
       method: "GET",
       headers: {
@@ -58,6 +58,9 @@ export async function GET(req: NextRequest) {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
         Referer: "https://www.jiosaavn.com/",
+      },
+      next: { 
+        revalidate: 3600 // Cache for 1 hour
       },
     });
 
@@ -73,7 +76,13 @@ export async function GET(req: NextRequest) {
 
     const data: SearchSong = await response.json();
     const formattedData = flattenSongsData(data);
-    return NextResponse.json(formattedData);
+    
+    // Return with cache headers
+    return NextResponse.json(formattedData, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+      },
+    });
   } catch (error) {
     console.error("Error fetching from JioSaavn API:", error);
     return NextResponse.json(

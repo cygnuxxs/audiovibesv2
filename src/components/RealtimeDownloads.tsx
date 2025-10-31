@@ -53,7 +53,7 @@ export default function RealtimeDownloads() {
   }, []);
 
   return (
-    <div className="flex items-center text-xs gap-2 w-full mx-auto">
+    <div className="flex items-center text-xs gap-2">
       <NumberFlow
         value={downloads}
         locales="en-US"

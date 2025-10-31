@@ -140,3 +140,65 @@
   --selection: oklch(0.922 0 0);
   --selection-foreground: oklch(0.205 0 0);
 }
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  overflow: auto;
+}
+
+/* Optimize rendering and prevent forced reflows */
+html {
+  /* Prevent layout shifts during theme changes */
+  contain: layout style;
+}
+
+/* Optimize animations to use GPU acceleration */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Use transform and opacity for better performance */
+  button,
+  a,
+  [role="button"] {
+    will-change: auto;
+  }
+}
+
+/* Prevent layout shift for images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimize font loading */
+@supports (font-variation-settings: normal) {
+  html {
+    font-optical-sizing: auto;
+  }
+}
+
+/* Optimize transitions to use GPU-accelerated properties only */
+* {
+  transition-property: transform, opacity, filter;
+}
+
+/* Prevent layout thrashing from reading offset properties */
+[data-theme] {
+  /* Cache theme values to prevent forced reflows */
+  contain: style;
+}

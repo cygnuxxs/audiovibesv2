@@ -1,10 +1,16 @@
 import { ModeToggle } from "@/components/DarkModeToggler";
-import React from "react";
+import React, { Suspense } from "react";
 import ThemeChanger from "@/components/theme-color-toggler";
 import SearchForm from "./SearchForm";
 import SearchResults from "@/components/SearchResults";
 import RealtimeDownloads from "@/components/RealtimeDownloads";
 import type { Metadata } from "next";
+import { searchSongs } from "@/lib/actions";
+import MusicSpectrumLoader from "./loaders/Spinner";
+
+// Route segment config for performance
+export const revalidate = 3600; // Revalidate every hour
+export const fetchCache = 'default-cache';
 
 export async function generateMetadata({
   searchParams,
@@ -44,26 +50,33 @@ const HomePage = async ({
   searchParams: Promise<{ q?: string }>;
 }) => {
   const query = (await searchParams).q;
+  
+  // Fetch songs on the server using server action
+  const songs = await searchSongs(query);
 
   return (
-    <div className="w-screen h-dvh flex bg-secondary/40 items-center justify-center">
-      <main className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg">
-        <header className="flex items-center justify-between pb-4">
+    <div className="w-full h-dvh flex bg-secondary/40 items-center justify-center overflow-hidden">
+      <main className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg overflow-hidden" style={{ contain: 'layout style paint' }}>
+        <header className="flex items-center justify-between pb-4 flex-shrink-0" style={{ contain: 'layout' }}>
           <h1 className="text-xs text-nowrap">
             <span className="font-bold text-primary rounded-md text-xl">
               AudioVibes
             </span>{" "}
             by Cygnuxxs
           </h1>
-          <div className="flex gap-2">
-          <RealtimeDownloads />
+          <div className="flex space-x-2">
+            <RealtimeDownloads />
             <ThemeChanger />
             <ModeToggle />
           </div>
         </header>
-        <SearchForm />
-        <section className="overflow-auto items-start justify-center h-full flex w-full gap-4 flex-wrap mt-4" aria-label="Search results">
-          <SearchResults query={query} />
+        <div className="flex-shrink-0" style={{ contain: 'layout' }}>
+          <SearchForm />
+        </div>
+        <section className="overflow-auto items-start justify-center flex-1 flex w-full gap-4 flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
+          <Suspense fallback={<MusicSpectrumLoader size="lg" />}>
+            <SearchResults songs={songs} />
+          </Suspense>
         </section>
       </main>
     </div>

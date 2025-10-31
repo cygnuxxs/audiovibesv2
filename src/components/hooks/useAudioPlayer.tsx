@@ -154,9 +154,12 @@ export default function useAudioPlayer(
       audio.removeEventListener("play", handlePlay);
       audio.removeEventListener("loadstart", handleLoadStart);
       // Ensure audio is stopped and src cleared on unmount
-      audio.pause();
-      audio.src = "";
-      audio.load(); // This will clear the audio buffer
+      // Use requestAnimationFrame to avoid forced reflow during cleanup
+      requestAnimationFrame(() => {
+        audio.pause();
+        audio.src = "";
+        audio.load(); // This will clear the audio buffer
+      });
     };
   }, []);
 

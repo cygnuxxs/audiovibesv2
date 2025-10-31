@@ -8,6 +8,9 @@ import { ActiveThemeProvider } from "@/components/active-theme";
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
+  display: "swap", // Use font-display: swap for better performance
+  preload: true,
+  fallback: ["system-ui", "arial"],
 });
 
 export const metadata = {
@@ -121,10 +124,30 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#000000" />
         <link rel="manifest" href="/manifest.webmanifest" />
+        {/* Preconnect to external domains for better performance */}
+        <link rel="preconnect" href="https://www.jiosaavn.com" />
+        <link rel="dns-prefetch" href="https://www.jiosaavn.com" />
+        {/* Initialize theme before hydration to prevent layout shift */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('app-theme') || 'default';
+                  document.documentElement.classList.add('theme-' + theme);
+                  if (theme.endsWith('-scaled')) {
+                    document.documentElement.classList.add('theme-scaled');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         {/* Enhanced JSON-LD Structured Data for Better SEO */}
         <Script 
           id="organization-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -150,6 +173,7 @@ export default function RootLayout({
         <Script 
           id="website-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -179,6 +203,7 @@ export default function RootLayout({
         <Script 
           id="webapp-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -213,7 +238,7 @@ export default function RootLayout({
 
         <Script
           id="register-sw"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {

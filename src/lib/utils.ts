@@ -165,7 +165,7 @@ export const flattenSongsData = (data: any): Song[] =>
       id: r.id,
       title: r.title,
       subtitle: r.subtitle,
-      image: (r.image as string).replace('150x150', '500x500'),
+      image: (r.image as string).replace('150x150', '50x50'),
       language: r.language,
       year: r.year,
       downloadUrl : createDownloadLink(info.encrypted_media_url as string),

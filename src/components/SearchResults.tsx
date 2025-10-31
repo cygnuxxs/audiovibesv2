@@ -1,32 +1,27 @@
-"use client";
-import React, { useEffect, useState, useTransition } from "react";
-import { searchSongs } from "@/lib/actions";
-const MusicSpectrumLoader = dynamic(() => import("@/app/loaders/Spinner"), {ssr : false});
-import dynamic from "next/dynamic";
-const SongCard = dynamic(() => import('./SongCard'), {ssr : false})
+import React from "react";
+import SongCard from './SongCard';
 
 export const revalidate = 3600;
 
-const SearchResults = ({ query }: { query?: string }) => {
-  const [data, setData] = useState<Song[]>([]);
-  const [isPending, startTransition] = useTransition();
-  
-  useEffect(() => {
-    startTransition(async () => {
-      try {
-        const res = await searchSongs(query);
-        setData(res);
-      } catch (err) {
-        console.error("Error fetching search results:", err);
-        setData([]);
-      }
-    });
-  }, [query]);
+const SearchResults = ({ songs }: { songs: Song[] }) => {
+  if (!songs || songs.length === 0) {
+    return (
+      <div className="w-full text-center py-8 text-muted-foreground">
+        <p>No songs found. Try searching for something else.</p>
+      </div>
+    );
+  }
 
-  return isPending ? (
-    <MusicSpectrumLoader size="lg" />
-  ) : (
-    data.map((song) => <SongCard song={song} key={song.id} />)
+  return (
+    <>
+      {songs.map((song, index) => (
+        <SongCard 
+          song={song} 
+          key={song.id} 
+          priority={index < 3} // Prioritize first 3 images (above the fold)
+        />
+      ))}
+    </>
   );
 };
 

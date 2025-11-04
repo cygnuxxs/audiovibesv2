@@ -80,7 +80,7 @@ const HomePage = async ({
         <div className="shrink-0" style={{ contain: 'layout' }}>
           <SearchForm />
         </div>
-        <section className="overflow-auto items-start justify-center flex-1 flex w-full space-y-2 space-x-2 flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
+        <section className="overflow-auto items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
           <Suspense fallback={<MusicSpectrumLoader size="lg" />}>
             <SearchResults songs={songs} />
           </Suspense>

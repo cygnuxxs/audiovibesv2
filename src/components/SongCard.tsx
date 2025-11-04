@@ -27,7 +27,7 @@ const SongCard: React.FC<{
         ["--tone-2" as string]: bgColor2,
 
       }}
-      className="group relative flex flex-1 sm:min-w-120 items-center gap-3 p-3 rounded-xl overflow-hidden"
+      className="group relative flex flex-1 min-w-100 items-center gap-3 p-3 rounded-xl overflow-hidden"
     >
       {/* Gradient overlay that fades in on hover */}
       <div
@@ -59,14 +59,14 @@ const SongCard: React.FC<{
         <Link
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[0.6rem] text-muted-foreground  hover:text-primary font-bold rounded-full w-fit p-1"
+          className="text-[0.6rem] text-muted-foreground text-wrap hover:text-primary font-bold rounded-full w-fit p-1"
           href={song.album_url ?? "#"}
           aria-label={`Album: ${decode(song.album as string)}`}
         >
           From {decode(song.album as string)}
         </Link>
         <Link
-          className="flex gap-2 text-xs items-center text-muted-foreground  w-fit rounded-full hover:text-primary font-bold"
+          className="flex gap-2 text-xs items-center text-wrap text-muted-foreground  w-fit rounded-full hover:text-primary font-bold"
           target="_blank"
           rel="noopener noreferrer"
           href={song.album_url || "#"}

@@ -33,7 +33,11 @@ export async function generateMetadata({
         description: `Find and download "${query}" in 320kbps quality.`,
       },
       alternates: {
-        canonical: `https://audiovibes.vercel.app/`,
+        canonical: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+      },
+      robots: {
+        index: true,
+        follow: true,
       },
     };
   }
@@ -41,6 +45,9 @@ export async function generateMetadata({
   return {
     title: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
     description: "Download premium 320kbps MP3 songs from JioSaavn for free. Search and download your favorite music with AudioVibes.",
+    alternates: {
+      canonical: "https://audiovibes.vercel.app/",
+    },
   };
 }
 
@@ -57,7 +64,7 @@ const HomePage = async ({
   return (
     <div className="w-full h-dvh flex bg-secondary/40 items-center justify-center overflow-hidden">
       <main className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg overflow-hidden" style={{ contain: 'layout style paint' }}>
-        <header className="flex items-center justify-between pb-4 flex-shrink-0" style={{ contain: 'layout' }}>
+        <header className="flex items-center justify-between pb-4 shrink-0" style={{ contain: 'layout' }}>
           <h1 className="text-xs text-nowrap">
             <span className="font-bold text-primary rounded-md text-xl">
               AudioVibes
@@ -70,10 +77,10 @@ const HomePage = async ({
             <ModeToggle />
           </div>
         </header>
-        <div className="flex-shrink-0" style={{ contain: 'layout' }}>
+        <div className="shrink-0" style={{ contain: 'layout' }}>
           <SearchForm />
         </div>
-        <section className="overflow-auto items-start justify-center flex-1 flex w-full gap-4 flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
+        <section className="overflow-auto items-start justify-center flex-1 flex w-full space-y-2 space-x-2 flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
           <Suspense fallback={<MusicSpectrumLoader size="lg" />}>
             <SearchResults songs={songs} />
           </Suspense>

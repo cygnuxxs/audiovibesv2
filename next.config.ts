@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   compress: true,
   // Optimize production builds
   poweredByHeader: false,
+  // Disable trailing slash to avoid duplicate URLs
+  trailingSlash: false,
   // Add security and SEO headers
   async headers() {
     return [

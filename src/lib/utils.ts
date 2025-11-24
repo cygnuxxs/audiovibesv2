@@ -71,7 +71,7 @@ export const addSongMetadata = async (buffer: ArrayBuffer, song: Song) => {
 
   /* ---------- 3.  optional album-art image (APIC) ---------------- */
   let apicFrames: MP3TagAPICFrame[] | undefined;
-  const coverUrl = song.image;
+  const coverUrl = song.image.replace('50x50', '500x500');
   if (coverUrl) {
     try {
       const res = await fetch(coverUrl, { mode: "cors" });

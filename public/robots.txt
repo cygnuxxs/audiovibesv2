@@ -2,12 +2,15 @@
 User-agent: *
 Allow: /
 
+# Disallow search result pages to prevent duplicate content
+Disallow: /*?q=
+Disallow: /*?*q=
+
+# Disallow API routes
+Disallow: /api/
+
 # Sitemap location
 Sitemap: https://audiovibes.vercel.app/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
-
-# Disallow admin or API routes if any
-# User-agent: *
-# Disallow: /api/

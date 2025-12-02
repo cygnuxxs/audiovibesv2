@@ -26,17 +26,17 @@ export async function generateMetadata({
       openGraph: {
         title: `Download "${query}" - AudioVibes Music Downloader`,
         description: `Get "${query}" in 320kbps quality for free. Premium music downloads at AudioVibes.`,
-        url: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+        url: "https://audiovibes.vercel.app",
       },
       twitter: {
         title: `Download "${query}" - AudioVibes`,
         description: `Find and download "${query}" in 320kbps quality.`,
       },
       alternates: {
-        canonical: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+        canonical: "https://audiovibes.vercel.app",
       },
       robots: {
-        index: true,
+        index: false,
         follow: true,
       },
     };
@@ -46,7 +46,7 @@ export async function generateMetadata({
     title: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
     description: "Download premium 320kbps MP3 songs from JioSaavn for free. Search and download your favorite music with AudioVibes.",
     alternates: {
-      canonical: "https://audiovibes.vercel.app/",
+      canonical: "https://audiovibes.vercel.app",
     },
   };
 }

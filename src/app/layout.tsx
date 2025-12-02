@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import { ActiveThemeProvider } from "@/components/active-theme";
+import { CanonicalURLManager } from "@/components/canonical-url-manager";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -70,6 +71,9 @@ export const metadata = {
   },
   alternates: {
     canonical: "https://audiovibes.vercel.app",
+    languages: {
+      'en-US': 'https://audiovibes.vercel.app',
+    },
   },
   openGraph: {
     title: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
@@ -117,6 +121,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="canonical" href="https://audiovibes.vercel.app" />
         <meta name="application-name" content="AudioVibes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -231,6 +236,7 @@ export default function RootLayout({
       <body className={`${montserrat.className} theme-container antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ActiveThemeProvider>
+            <CanonicalURLManager />
             {children}
             <Toaster />
             </ActiveThemeProvider>

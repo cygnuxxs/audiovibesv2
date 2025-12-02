@@ -5,8 +5,7 @@ import SearchForm from "./SearchForm";
 import SearchResults from "@/components/SearchResults";
 import RealtimeDownloads from "@/components/RealtimeDownloads";
 import type { Metadata } from "next";
-import { searchSongs } from "@/lib/actions";
-import MusicSpectrumLoader from "./loaders/Spinner";
+import SongCardListSkeleton from "./loaders/loader";
 
 // Route segment config for performance
 export const revalidate = 3600; // Revalidate every hour
@@ -26,18 +25,19 @@ export async function generateMetadata({
       openGraph: {
         title: `Download "${query}" - AudioVibes Music Downloader`,
         description: `Get "${query}" in 320kbps quality for free. Premium music downloads at AudioVibes.`,
-        url: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+        url: `https://audiovibes.vercel.app`,
       },
       twitter: {
         title: `Download "${query}" - AudioVibes`,
         description: `Find and download "${query}" in 320kbps quality.`,
       },
       alternates: {
-        canonical: `https://audiovibes.vercel.app/?q=${encodeURIComponent(query)}`,
+        canonical: "https://audiovibes.vercel.app",
       },
       robots: {
-        index: true,
+        index: false,
         follow: true,
+        noarchive: true,
       },
     };
   }
@@ -46,7 +46,7 @@ export async function generateMetadata({
     title: "AudioVibes - Free High-Quality Music Downloader | 320kbps MP3 Songs",
     description: "Download premium 320kbps MP3 songs from JioSaavn for free. Search and download your favorite music with AudioVibes.",
     alternates: {
-      canonical: "https://audiovibes.vercel.app/",
+      canonical: "https://audiovibes.vercel.app",
     },
   };
 }
@@ -57,9 +57,6 @@ const HomePage = async ({
   searchParams: Promise<{ q?: string }>;
 }) => {
   const query = (await searchParams).q;
-  
-  // Fetch songs on the server using server action
-  const songs = await searchSongs(query);
 
   return (
     <div className="w-full h-dvh flex bg-secondary/40 items-center justify-center overflow-hidden">
@@ -81,8 +78,8 @@ const HomePage = async ({
           <SearchForm />
         </div>
         <section className="overflow-auto items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
-          <Suspense fallback={<MusicSpectrumLoader size="lg" />}>
-            <SearchResults songs={songs} />
+          <Suspense key={query || 'default'} fallback={<SongCardListSkeleton />}>
+            <SearchResults query={query} />
           </Suspense>
         </section>
       </main>

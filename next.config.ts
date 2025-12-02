@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Disable trailing slash to avoid duplicate URLs
   trailingSlash: false,
+  // Add redirects to handle common duplicate URL patterns
+  async redirects() {
+    return [
+      {
+        source: '/index',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/index.html',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
   // Add security and SEO headers
   async headers() {
     return [

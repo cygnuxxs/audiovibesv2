@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import { ActiveThemeProvider } from "@/components/active-theme";
-import { CanonicalURLManager } from "@/components/canonical-url-manager";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -236,10 +235,9 @@ export default function RootLayout({
       <body className={`${montserrat.className} theme-container antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ActiveThemeProvider>
-            <CanonicalURLManager />
             {children}
             <Toaster />
-            </ActiveThemeProvider>
+          </ActiveThemeProvider>
         </ThemeProvider>
 
         <Script

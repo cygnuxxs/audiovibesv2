@@ -6,6 +6,9 @@ import SearchResults from "@/components/SearchResults";
 import RealtimeDownloads from "@/components/RealtimeDownloads";
 import type { Metadata } from "next";
 import SongCardListSkeleton from "./loaders/loader";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Music2 } from "lucide-react";
 
 // Route segment config for performance
 export const revalidate = 3600; // Revalidate every hour
@@ -75,7 +78,16 @@ const HomePage = async ({
           </div>
         </header>
         <div className="shrink-0" style={{ contain: 'layout' }}>
-          <SearchForm />
+          <Suspense fallback={
+            <div className="flex items-center gap-2">
+              <Input placeholder="Enter your Favourite Music" disabled />
+              <Button type="submit" size={"sm"} disabled>
+                Find <Music2 className="ml-2" />
+              </Button>
+            </div>
+          }>
+            <SearchForm />
+          </Suspense>
         </div>
         <section className="overflow-auto items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-4 min-h-0" aria-label="Search results" style={{ contain: 'layout' }}>
           <Suspense key={query || 'default'} fallback={<SongCardListSkeleton />}>

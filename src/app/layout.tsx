@@ -106,10 +106,6 @@ export const metadata = {
     creator: "@cygnuxxs",
     site: "@cygnuxxs",
   },
-  verification: {
-    google: "google-site-verification-code", // User should add their actual code
-  },
-  category: "music",
   applicationName: "AudioVibes Music Downloader",
   appleWebApp: {
     capable: true,

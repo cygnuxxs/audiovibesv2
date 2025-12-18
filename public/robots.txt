@@ -1,10 +1,18 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-Disallow: /?*
 
 # Sitemap location
 Sitemap: https://audiovibes.vercel.app/sitemap.xml
 
 # Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# User-agent specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
 Crawl-delay: 1

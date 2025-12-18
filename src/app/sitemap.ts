@@ -6,7 +6,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: "https://audiovibes.vercel.app",
       lastModified: new Date(),
       changeFrequency: "daily",
-      priority: 1,
+      priority: 1.0,
+    },
+    {
+      url: "https://audiovibes.vercel.app/",
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1.0,
     },
   ];
 }

@@ -8,7 +8,7 @@ import { ActiveThemeProvider } from "@/components/active-theme";
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
-  display: "swap", // Use font-display: swap for better performance
+  display: "swap",
   preload: true,
   fallback: ["system-ui", "arial"],
 });

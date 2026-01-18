@@ -10,6 +10,15 @@ import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
 import { incrementDownloads } from '@/lib/actions';
 
+// Helper to sanitize filename for FFmpeg's virtual FS
+const sanitizeFilename = (filename: string): string => {
+  return filename
+    .replace(/[<>:"\/\\|?*\x00-\x1f]/g, '_') // Replace invalid chars
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim()
+    .substring(0, 200); // Limit length
+};
+
 const PlayCard = ({ song }: { song: Song }) => {
   const { id, title, album } = song;
 
@@ -47,8 +56,13 @@ const PlayCard = ({ song }: { song: Song }) => {
       }
       const arrayBuffer = await response.arrayBuffer();
 
-      const inputFileName = "input.audio";
-      const outputFileName = `${decode(title)} - ${decode(album || 'Unknown Album')}.mp3`;
+      // Use unique filenames to prevent conflicts between simultaneous downloads
+      const uniqueId = Date.now();
+      const inputFileName = `input_${uniqueId}.audio`;
+      const sanitizedTitle = sanitizeFilename(decode(title));
+      const sanitizedAlbum = sanitizeFilename(decode(album || 'Unknown Album'));
+      const tempOutputFileName = `output_${uniqueId}.mp3`;
+      const finalFileName = `${sanitizedTitle} - ${sanitizedAlbum}.mp3`;
 
       // Write to FFmpeg FS
       loadedFFmpeg.writeFile(inputFileName, new Uint8Array(arrayBuffer));
@@ -61,11 +75,11 @@ const PlayCard = ({ song }: { song: Song }) => {
         "libmp3lame",
         "-q:a", // Variable BitRate quality scale (0-9, 0 is highest)
         "2",
-        outputFileName,
+        tempOutputFileName,
       ]);
 
       // Read output
-      const data = await loadedFFmpeg.readFile(outputFileName, 'binary');
+      const data = await loadedFFmpeg.readFile(tempOutputFileName, 'binary');
       const encoder = new TextEncoder()
       // Ensure data is Uint8Array
       const uint8Data = data instanceof Uint8Array ? data : new Uint8Array(encoder.encode(data));
@@ -74,13 +88,17 @@ const PlayCard = ({ song }: { song: Song }) => {
       const updatedBuffer = await addSongMetadata(uint8Data.buffer as ArrayBuffer, song);
       const blob = new Blob([updatedBuffer], { type: "audio/mpeg" });
 
-      downloadBlob(blob, outputFileName); // Use helper for download
+      downloadBlob(blob, finalFileName); // Use sanitized filename for download
 
       // Clean up FFmpeg files
-      loadedFFmpeg.deleteFile(inputFileName);
-      loadedFFmpeg.deleteFile(outputFileName);
+      try {
+        loadedFFmpeg.deleteFile(inputFileName);
+        loadedFFmpeg.deleteFile(tempOutputFileName);
+      } catch (cleanupError) {
+        console.warn("FFmpeg cleanup warning:", cleanupError);
+      }
       startTransition(() => incrementDownloads())
-      toast.success(`Downloaded: ${outputFileName}`);
+      toast.success(`Downloaded: ${finalFileName}`);
     } catch (err) {
       console.error("Download/Conversion error:", err);
       const errorMessage = err instanceof Error ? err.message : "An unknown error occurred during download.";

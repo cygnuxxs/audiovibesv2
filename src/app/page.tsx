@@ -139,12 +139,12 @@ const HomePage = async ({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="w-full h-dvh flex flex-col bg-background items-center justify-center overflow-hidden">
+      <div className="w-dvw max-h-dvh flex bg-background items-center justify-center">
         <main
-          className="px-4 py-3 flex flex-col rounded-4xl bg-card/30 border border-border shadow-xl max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] overflow-hidden relative"
+          className="sm:px-4 sm:py-3 flex flex-col sm:rounded-4xl bg-card/30 border border-border shadow-xl max-w-6xl w-full max-sm:h-dvh sm:mt-4 max-sm:w-full sm:h-[calc(100vh-2rem)] overflow-hidden relative"
           style={{ contain: 'layout style paint' }}
         >
-          <header className="flex items-center justify-between pb-2 shrink-0" style={{ contain: 'layout' }}>
+          <header className="flex items-center max-sm:p-1 justify-between pb-2 shrink-0" style={{ contain: 'layout' }}>
             <div className="text-xs text-nowrap border border-border shadow-lg rounded-2xl bg-card p-2 flex flex-col justify-center">
               <h1 className="font-bold text-primary rounded-md text-xl leading-none">
                 AudioVibes
@@ -159,7 +159,7 @@ const HomePage = async ({
             </div>
           </header>
 
-          <section className="shrink-0" style={{ contain: 'layout' }}>
+          <section className="shrink-0 max-sm:px-1" style={{ contain: 'layout' }}>
             <Suspense fallback={
               <div className="flex items-center gap-2">
                 <Input placeholder="Search songs, albums, artists..." disabled className="bg-muted" />
@@ -173,7 +173,7 @@ const HomePage = async ({
           </section>
 
           <section
-            className="overflow-auto items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-4 min-h-0"
+            className="overflow-auto max-sm:px-1 items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-2 min-h-0"
             aria-label={query ? `Search results for ${query}` : "Recommended songs"}
             style={{ contain: 'layout' }}
           >
@@ -183,7 +183,7 @@ const HomePage = async ({
           </section>
         </main>
         {!query && (
-            <footer className="mt-4 h-0 overflow-auto pt-4 border-t border-border/40">
+            <footer hidden className="mt-4 h-0 overflow-auto pt-4 border-t border-border/40">
               <div className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
                  <SEOContent />
                  <p className="mt-2">

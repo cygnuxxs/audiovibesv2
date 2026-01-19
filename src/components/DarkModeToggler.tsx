@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useKeyPress } from "./hooks/useKeyPress";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -8,12 +8,16 @@ import { Button } from "@/components/ui/button";
 
 export function ModeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
+  useKeyPress("d", (e : KeyboardEvent) => {
+    e.preventDefault();
+    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  })
 
   return (
     <Button
       variant={"ghost"}
       size={"icon"}
-      className="h-10 w-10 hover:bg-primary/20 transition-all"
+      className="size-8 text-muted-foreground rounded-full hover:bg-primary/20 transition-all"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       aria-label="Change Light/Dark Mode"
     >

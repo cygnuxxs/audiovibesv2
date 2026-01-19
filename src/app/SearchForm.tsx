@@ -17,14 +17,14 @@ export default function SearchForm() {
     const formData = new FormData(e.currentTarget)
     const songName = formData.get("song-name") as string
     if (songName.length < 3) return
-    
+
     startTransition(() => {
       router.push(`/?q=${encodeURIComponent(songName)}`)
     })
   }
-  
+
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center backdrop-blur-xs gap-1 p-2 bg-card/20 rounded-full border border-border">
       <Input
         required
         minLength={3}
@@ -32,8 +32,10 @@ export default function SearchForm() {
         name="song-name"
         defaultValue={currentQuery}
         disabled={isPending}
+        aria-label="Enter your Favourite Music"
+        className="rounded-full shadow-md border border-border bg-card"
       />
-      <Button type="submit" size={"sm"} disabled={isPending}>
+      <Button type="submit" size={"sm"} className="rounded-full shadow-lg shadow-primary/80" disabled={isPending}>
         {isPending ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -41,7 +43,7 @@ export default function SearchForm() {
           </>
         ) : (
           <>
-            Find <Music2 className="ml-2" />
+            Find <Music2 />
           </>
         )}
       </Button>

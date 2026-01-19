@@ -97,14 +97,14 @@ export default function ThemeChanger({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            className="h-10 w-10 text-primary hover:text-primary/80 hover:bg-primary/20"
+            className="size-8 rounded-full text-primary hover:text-primary/80 hover:bg-primary/20"
           >
             <Palette className="h-4 w-4" color="currentColor" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="max-h-[10rem] overflow-auto w-fit">
+        <DropdownMenuContent className="max-h-40 outline-none border shadow-xl backdrop-blur-xs bg-card border-border rounded-2xl overflow-auto w-fit">
           <DropdownMenuLabel className="text-xs">
             {currentThemeLabel}
           </DropdownMenuLabel>

@@ -3,20 +3,14 @@ import React, { Suspense } from "react";
 import ThemeChanger from "@/components/theme-color-toggler";
 import SearchForm from "./SearchForm";
 import SearchResults from "@/components/SearchResults";
-import RealtimeDownloads from "@/components/RealtimeDownloads";
 import type { Metadata, Viewport } from "next"; // Added Viewport
 import SongCardListSkeleton from "./loaders/loader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Music2 } from "lucide-react";
 import SEOContent from "@/components/SEOContent";
-
-// Performance & Caching
-// Note: Pages using searchParams are dynamically rendered on request.
-// However, fetch requests inside can still be cached.
 export const revalidate = 3600;
 
-// Viewport export is now separate from Metadata in Next.js 14+
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
@@ -35,8 +29,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const query = (await searchParams).q;
 
-  // 1. DYNAMIC SEARCH RESULTS METADATA
-  // Best Practice: Do NOT index internal search results to save crawl budget
   if (query) {
     const decodedQuery = decodeURIComponent(query);
     return {
@@ -147,15 +139,13 @@ const HomePage = async ({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="w-full h-dvh flex flex-col bg-secondary/40 items-center justify-center overflow-hidden">
+      <div className="w-full h-dvh flex flex-col bg-background items-center justify-center overflow-hidden">
         <main
-          className="p-4 flex flex-col bg-background shadow-md max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] rounded-lg overflow-hidden relative"
+          className="px-4 py-3 flex flex-col rounded-4xl bg-card/30 border border-border shadow-xl max-w-6xl w-full max-sm:h-full max-sm:w-full h-[93%] overflow-hidden relative"
           style={{ contain: 'layout style paint' }}
         >
-          {/* Header */}
-          <header className="flex items-center justify-between pb-4 shrink-0" style={{ contain: 'layout' }}>
-            <div className="text-xs text-nowrap flex flex-col justify-center">
-              {/* H1 is crucial for SEO. Putting it here. */}
+          <header className="flex items-center justify-between pb-2 shrink-0" style={{ contain: 'layout' }}>
+            <div className="text-xs text-nowrap border border-border shadow-lg rounded-2xl bg-card p-2 flex flex-col justify-center">
               <h1 className="font-bold text-primary rounded-md text-xl leading-none">
                 AudioVibes
               </h1>
@@ -163,14 +153,12 @@ const HomePage = async ({
                 by Cygnuxxs
               </span>
             </div>
-            <div className="flex space-x-2 items-center">
-              <RealtimeDownloads />
+            <div className="flex gap-1 p-1 bg-card border border-border shadow-md rounded-full items-center">
               <ThemeChanger />
               <ModeToggle />
             </div>
           </header>
 
-          {/* Search Area */}
           <section className="shrink-0" style={{ contain: 'layout' }}>
             <Suspense fallback={
               <div className="flex items-center gap-2">
@@ -184,7 +172,6 @@ const HomePage = async ({
             </Suspense>
           </section>
 
-          {/* Results Area */}
           <section
             className="overflow-auto items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-4 min-h-0"
             aria-label={query ? `Search results for ${query}` : "Recommended songs"}
@@ -196,7 +183,7 @@ const HomePage = async ({
           </section>
         </main>
         {!query && (
-            <footer className="mt-4 h-12 overflow-auto pt-4 border-t border-border/40">
+            <footer className="mt-4 h-0 overflow-auto pt-4 border-t border-border/40">
               <div className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
                  <SEOContent />
                  <p className="mt-2">

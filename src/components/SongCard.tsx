@@ -34,9 +34,9 @@ const SongCard: React.FC<{
           <h2 className="text-lg text-ellipsis font-black">
             {decode(song.title)}
           </h2>
-          <div className="block space-y-2 border w-full bg-linear-to-tl from-card/10 from-10% to-card border-border rounded-xl p-2 shadow-xl">
+          <div className="block space-y-2 border w-full border-none p-2">
             <Link
-              className="flex gap-2 text-xs items-center drop-shadow-xl bg-card text-card-foreground text-wrap w-fit rounded-full hover:text-primary font-bold"
+              className="flex gap-2 text-xs items-center text-card-foreground text-wrap w-fit rounded-full hover:text-primary font-bold"
               target="_blank"
               rel="noopener noreferrer"
               href={song.album_url || "#"}

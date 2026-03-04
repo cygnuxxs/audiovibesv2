@@ -2,31 +2,137 @@
 
 **Free High-Quality Music Downloader | 320kbps MP3 Songs from JioSaavn**
 
-AudioVibes is a powerful, free music downloader that lets you download premium 320kbps MP3 songs from JioSaavn. Built with Next.js 15 and optimized for performance and SEO.
+AudioVibes is a modern web application that enables users to search, stream, and download high-quality music from JioSaavn. Built with Next.js 15 and optimized for performance, it provides a seamless music discovery and download experience with zero ads and no registration required.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
-## 🚀 Features
+## 🎯 What It Does
 
-- 🎵 Download high-quality 320kbps MP3 songs
-- 🔍 Fast and accurate music search
-- 🎨 Beautiful, responsive UI with dark mode
-- 📱 Progressive Web App (PWA) support
-- ⚡ Lightning-fast performance
-- 🎯 SEO optimized for top Google rankings
-- 🌐 Works offline with Service Worker
+AudioVibes solves the problem of accessing high-quality music downloads by providing:
+
+- **Music Search**: Search through millions of songs from JioSaavn's extensive catalog
+- **Instant Streaming**: Play songs directly in your browser with built-in audio player
+- **High-Quality Downloads**: Download songs in 320kbps MP3 format with proper metadata (artist, album, artwork)
+- **Progressive Web App**: Install as a native-like app on any device for offline access
+- **Download Tracking**: Monitor total downloads across all users via Supabase analytics
+
+## 🔧 How It Works
+
+### Architecture Overview
+
+AudioVibes is a full-stack Next.js application using the App Router with server-side rendering and API routes.
+
+```
+User Interface (React) → Next.js API Routes → JioSaavn API → Audio Processing → Download
+                                          ↓
+                                   Supabase (Analytics)
+```
+
+### Core Technical Implementation
+
+#### 1. **Music Search Flow**
+
+- **Frontend**: User enters search query in [`SearchForm.tsx`](src/app/SearchForm.tsx)
+- **API Route**: Request sent to [`/api/search/route.ts`](src/app/api/search/route.ts)
+- **External API**: Makes proxied request to JioSaavn's web API with proper headers:
+  ```typescript
+  https://www.jiosaavn.com/api.php?__call=search.getResults
+  ```
+- **Response Caching**: Results cached for 1 hour using Next.js ISR (`revalidate: 3600`)
+- **Data Transformation**: Raw API response flattened and normalized via `flattenSongsData()`
+- **Display**: Results rendered in [`SearchResults.tsx`](src/components/SearchResults.tsx)
+
+#### 2. **Audio Streaming**
+
+- **Player Hook**: [`useAudioPlayer.tsx`](src/components/hooks/useAudioPlayer.tsx) manages HTML5 audio element
+- **Audio Manager**: Singleton [`audioManager.ts`](src/components/hooks/audioManager.ts) ensures only one song plays at a time
+- **Buffer Management**: Implements `canplaythrough` event to prevent playback until sufficient audio is buffered
+- **Error Handling**: Comprehensive error handling for network issues, codec problems, and timeout scenarios
+- **User Feedback**: Toast notifications for play/pause/error states using Sonner
+
+#### 3. **Download & Audio Processing**
+
+The download process involves multiple steps handled in [`PlayCard.tsx`](src/components/PlayCard.tsx):
+
+**Step 1: Audio Fetching with Progress Tracking**
+```typescript
+// Fetch audio with ReadableStream for progress monitoring
+const reader = response.body.getReader();
+const chunks: Uint8Array[] = [];
+let receivedLength = 0;
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  chunks.push(value);
+  receivedLength += value.length;
+  setDownloadProgress((receivedLength / contentLength) * 100);
+}
+```
+
+**Step 2: FFmpeg Conversion**
+- **FFmpeg Loading**: WebAssembly-based FFmpeg loaded on-demand via [`useFfmpeg.tsx`](src/components/hooks/useFfmpeg.tsx)
+- **Format Conversion**: Audio transcoded to MP3 format with proper codec settings
+- **In-Browser Processing**: All conversion happens client-side, no server processing required
+
+**Step 3: Metadata Embedding**
+- **ID3 Tags**: Song title, artist, album, and artwork embedded using `music-metadata-browser`
+- **Sanitization**: Filenames sanitized to remove invalid characters
+- **Album Art**: Cover image fetched and converted to JPEG buffer for embedding
+
+**Step 4: Browser Download**
+```typescript
+const blob = new Blob([outputData], { type: 'audio/mpeg' });
+const url = URL.createObjectURL(blob);
+downloadBlob(url, `${sanitizedTitle}.mp3`);
+```
+
+#### 4. **Database Analytics**
+
+- **Supabase Integration**: [`supabase.ts`](src/lib/supabase.ts) client for serverless PostgreSQL
+- **Download Counter**: [`incrementDownloads()`](src/lib/actions.ts) increments global counter on each download
+- **Server Actions**: Uses Next.js server actions for secure database operations
+
+#### 5. **Performance Optimizations**
+
+**Caching Strategy**
+- API responses cached for 1 hour with stale-while-revalidate
+- Static assets served with long-term cache headers
+- Dynamic metadata for SEO with search query support
+
+**Code Splitting**
+- FFmpeg (large dependency) loaded only when download initiated
+- Components lazy-loaded using React Suspense
+- Separate loading states with [`SongCardListSkeleton`](src/app/loaders/loader.tsx)
+
+**State Management**
+- React hooks for local state (playback, downloads)
+- Singleton audio manager prevents memory leaks
+- Debounced search input via [`useDebounce.ts`](src/components/hooks/useDebounce.ts)
+
+### 6. **SEO & Discoverability**
+
+- **Dynamic Metadata**: Search-specific meta tags generated in [`page.tsx`](src/app/page.tsx)
+- **Structured Data**: JSON-LD schema for WebApplication and Organization
+- **Open Graph**: Rich social media previews with images
+- **Sitemap**: Auto-generated [`sitemap.ts`](src/app/sitemap.ts)
+- **Robots.txt**: Search results marked `noindex` to prevent thin content penalties
 
 ## 🛠️ Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS 4
-- **UI Components:** Radix UI
-- **Audio Processing:** FFmpeg
-- **Database:** Supabase
-- **Deployment:** Vercel
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Framework** | Next.js 15 (App Router) | React framework with SSR, API routes, and ISR |
+| **Language** | TypeScript 5 | Type-safe development |
+| **Styling** | Tailwind CSS 4 | Utility-first styling with JIT compiler |
+| **UI Components** | Radix UI | Accessible, unstyled component primitives |
+| **Audio Processing** | FFmpeg.wasm | Client-side audio conversion and metadata |
+| **Database** | Supabase | PostgreSQL for analytics tracking |
+| **State Management** | React Hooks | useState, useCallback, useRef, custom hooks |
+| **HTTP Client** | Fetch API | Native browser networking with streams |
+| **Deployment** | Vercel | Edge functions and CDN hosting |
 
 ## 📦 Getting Started
 
@@ -34,6 +140,7 @@ AudioVibes is a powerful, free music downloader that lets you download premium 3
 
 - Node.js 20.x or higher
 - npm, yarn, pnpm, or bun
+- (Optional) Supabase account for analytics
 
 ### Installation
 
@@ -44,36 +151,23 @@ cd audiovibesv2
 
 # Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
 
-### Development
+# Set up environment variables
+cp .env.example .env.local
+# Add your SUPABASE_URL and SUPABASE_ANON_KEY
+```
 
 ### Development
 
 ```bash
 # Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Run with HTTPS (for PWA testing)
+npm run dev-https
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
-
-### HTTPS Development (Optional)
-
-```bash
-npm run dev-https
-```
 
 ### Production Build
 
@@ -82,61 +176,62 @@ npm run build
 npm run start
 ```
 
-## 📈 SEO Optimization
+## 📁 Project Structure
 
-This project is fully optimized for search engines with:
+```
+src/
+├── app/
+│   ├── api/search/route.ts      # JioSaavn API proxy
+│   ├── page.tsx                  # Homepage with SEO metadata
+│   ├── SearchForm.tsx            # Search input component
+│   └── layout.tsx                # Root layout with providers
+│
+├── components/
+│   ├── PlayCard.tsx              # Play/download controls
+│   ├── SearchResults.tsx         # Results grid display
+│   ├── SongCard.tsx              # Individual song card
+│   └── hooks/
+│       ├── useAudioPlayer.tsx    # Audio playback logic
+│       ├── useFfmpeg.tsx         # FFmpeg loading/conversion
+│       ├── audioManager.ts       # Global audio singleton
+│       └── useDebounce.ts        # Search input debouncing
+│
+└── lib/
+    ├── actions.ts                # Server actions (DB operations)
+    ├── supabase.ts               # Supabase client config
+    └── utils.ts                  # Helper functions
+```
 
-- ✅ Comprehensive metadata and Open Graph tags
-- ✅ JSON-LD structured data (Organization, WebSite, WebApplication)
-- ✅ Dynamic metadata for search results
-- ✅ robots.txt and sitemap.xml
-- ✅ Mobile-responsive and PWA ready
-- ✅ Optimized performance (Core Web Vitals)
-- ✅ Security headers configured
+## 🚀 Key Features Explained
 
-### SEO Documentation
+### Progressive Web App (PWA)
+- Service worker ([`sw.js`](public/sw.js)) for offline caching
+- Web manifest ([`manifest.ts`](src/app/manifest.ts)) for installability
+- Theme color adaptation based on user preference
 
-For detailed SEO information, see:
-- [`SEO_GUIDE.md`](./SEO_GUIDE.md) - Comprehensive SEO guide
-- [`SEO_ACTION_PLAN.md`](./SEO_ACTION_PLAN.md) - Quick action items
+### Dark Mode & Themes
+- System preference detection
+- Manual toggle via [`DarkModeToggler.tsx`](src/components/DarkModeToggler.tsx)
+- Multiple color themes in [`theme-color-toggler.tsx`](src/components/theme-color-toggler.tsx)
 
-## 🎯 Key Features
-
-### Search & Download
-- Search millions of songs from JioSaavn
-- Download in premium 320kbps quality
-- Fast and reliable downloads
-- Batch download support
-
-### User Experience
-- Modern, intuitive interface
-- Dark mode support
-- Multiple color themes
-- Real-time download tracking
-- Responsive design (mobile, tablet, desktop)
-
-### Performance
-- Server-side rendering (SSR)
-- Image optimization (AVIF, WebP)
-- Code splitting and lazy loading
-- Service Worker for offline support
-- Compression enabled
-
-## 📱 Progressive Web App
-
-AudioVibes can be installed as a PWA on any device:
-
-1. Visit https://audiovibes.vercel.app
-2. Click "Install" or "Add to Home Screen"
-3. Enjoy offline functionality
+### Accessibility
+- Keyboard navigation support via [`useKeyPress.ts`](src/components/hooks/useKeyPress.ts)
+- ARIA labels and semantic HTML
+- Focus management for modals and dropdowns
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👤 Author
 
@@ -146,44 +241,17 @@ This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- [Next.js](https://nextjs.org) - The React Framework
-- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS
-- [Radix UI](https://www.radix-ui.com) - Accessible components
-- [Vercel](https://vercel.com) - Deployment platform
-
-## 📊 Project Stats
-
-- **Version:** 2.0
-- **Last Updated:** October 2025
-- **Status:** Active Development
+- [Next.js](https://nextjs.org) - React framework with excellent DX
+- [FFmpeg.wasm](https://ffmpegwasm.netlify.app/) - WebAssembly port of FFmpeg
+- [Radix UI](https://www.radix-ui.com) - Accessible component primitives
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Supabase](https://supabase.com) - Open-source Firebase alternative
 
 ## 🔗 Links
 
-- **Live Demo:** [https://audiovibes.vercel.app](https://audiovibes.vercel.app)
-- **GitHub:** [https://github.com/cygnuxxs/audiovibesv2](https://github.com/cygnuxxs/audiovibesv2)
+- **Live Demo**: [https://audiovibes.vercel.app](https://audiovibes.vercel.app)
+- **GitHub**: [https://github.com/cygnuxxs/audiovibesv2](https://github.com/cygnuxxs/audiovibesv2)
 
 ---
 
-Made with ❤️ by [Cygnuxxs](https://github.com/cygnuxxs)
-
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Version**: 2.0 | **Status**: Active Development | Made with ❤️ by [Cygnuxxs](https://github.com/cygnuxxs)

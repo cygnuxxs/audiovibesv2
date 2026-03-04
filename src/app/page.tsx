@@ -145,7 +145,7 @@ const HomePage = async ({
           style={{ contain: 'layout style paint' }}
         >
           <header className="flex items-center max-sm:p-1 justify-between pb-2 shrink-0" style={{ contain: 'layout' }}>
-            <div className="text-xs text-nowrap border border-border shadow-lg rounded-2xl bg-card p-2 flex flex-col justify-center">
+            <div className="text-xs text-nowrap p-2 flex flex-col justify-center">
               <h1 className="font-bold text-primary rounded-md text-xl leading-none">
                 AudioVibes
               </h1>

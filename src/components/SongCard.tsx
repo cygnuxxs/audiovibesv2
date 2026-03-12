@@ -17,7 +17,7 @@ const SongCard: React.FC<{
   return (
     <div className="group relative bg-card/50 flex flex-1 min-w-100 items-center gap-3 p-2 rounded-3xl overflow-hidden">
       <div className="relative flex gap-3 w-full">
-        <div className="relative w-[200px] h-[200px] max-sm:w-32 max-sm:h-32 shrink-0">
+        <div className="relative size-50 max-sm:w-32 max-sm:h-32 shrink-0">
           <Image
             className="object-cover rounded-2xl"
             src={highResImageUrl}
@@ -43,7 +43,7 @@ const SongCard: React.FC<{
               aria-label={`Artist: ${song.primary_artist_name}`}
             >
               {artistImageUrl && (
-                <div className="relative w-[25px] h-[25px] shrink-0">
+                <div className="relative size-6.25 shrink-0">
                   <Image
                     className="rounded-full object-cover"
                     src={artistImageUrl ?? "/profile-circle.png"}

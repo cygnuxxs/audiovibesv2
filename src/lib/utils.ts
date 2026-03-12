@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx";
 import MP3Tag from "mp3tag.js";
 import { MP3TagAPICFrame } from "mp3tag.js/types/id3v2/frames";

@@ -2,6 +2,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import {Analytics} from '@vercel/analytics/next'
 import Script from "next/script";
 import { ActiveThemeProvider } from "@/components/active-theme";
 
@@ -246,6 +247,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${montserrat.className} theme-container antialiased`}>
+        <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ActiveThemeProvider>
             {children}

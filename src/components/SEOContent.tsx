@@ -62,7 +62,7 @@ const SEOContent = () => {
         <p>
           AudioVibes is the ultimate <strong>free music downloader</strong> designed for audiophiles who demand nothing but the best.
           Unlike other platforms, we provide direct access to <strong>high-quality 320kbps MP3 songs</strong> from JioSaavn, ensuring
-          you get crystal clear audio every time. Whether you're looking for the latest Bollywood hits, trending Punjabi tracks, or
+          you get crystal clear audio every time. Whether you&apos;re looking for the latest Bollywood hits, trending Punjabi tracks, or
           timeless classics, AudioVibes makes it effortless to <strong>download music free</strong>.
         </p>
       </div>
@@ -71,7 +71,7 @@ const SEOContent = () => {
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-foreground">Premium Quality Audio</h3>
           <p>
-            Don't settle for low-quality 128kbps streams. With our <strong>JioSaavn downloader</strong>, you get authentic
+            Don&apos;t settle for low-quality 128kbps streams. With our <strong>JioSaavn downloader</strong>, you get authentic
             320kbps audio files that preserve every detail of the original recording. Experience your favorite songs exactly
             as the artists intended, with deep bass and clear trebles.
           </p>
@@ -80,7 +80,7 @@ const SEOContent = () => {
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-foreground">Fast, Ad-Free Experience</h3>
           <p>
-            We believe music should be accessible to everyone without annoyances. That's why AudioVibes offers a
+            We believe music should be accessible to everyone without annoyances. That&apos;s why AudioVibes offers a
             <strong>no ads music</strong> experience. Our optimized servers ensure lightning-fast downloads, so you can
             build your offline library in seconds.
           </p>
@@ -89,7 +89,7 @@ const SEOContent = () => {
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-foreground">Universal Compatibility</h3>
           <p>
-            Our <strong>MP3 downloader</strong> works perfectly on all devices. Whether you're using an iPhone, Android
+            Our <strong>MP3 downloader</strong> works perfectly on all devices. Whether you&apos;re using an iPhone, Android
             smartphone, PC, or Mac, you can <strong>download songs online</strong> directly to your device without installing
             additional software or apps.
           </p>
@@ -151,7 +151,7 @@ const SEOContent = () => {
         <p>
           AudioVibes gives you access to millions of songs across various genres. Download <strong>Bollywood songs</strong>,
           <strong> Punjabi tracks</strong>, <strong>English hits</strong>, <strong>Tamil music</strong>, <strong>Telugu songs</strong>,
-          <strong>regional music</strong>, and much more. Whether you're looking for the latest chart-toppers or timeless classics,
+          <strong>regional music</strong>, and much more. Whether you&apos;re looking for the latest chart-toppers or timeless classics,
           our extensive library has everything you need.
         </p>
       </div>
@@ -160,7 +160,7 @@ const SEOContent = () => {
         <h3 className="text-xl font-semibold text-foreground">Why AudioVibes is the Best Music Downloader in 2024</h3>
         <p>
           In a crowded market of <strong>music downloaders</strong>, AudioVibes stands out with its commitment to quality,
-          speed, and user experience. We don't bombard you with ads, we don't require sign-ups, and we never compromise on
+          speed, and user experience. We don&apos;t bombard you with ads, we don&apos;t require sign-ups, and we never compromise on
           <strong> audio quality</strong>. Our platform is built by music lovers, for music lovers. With lightning-fast servers
           and a constantly updated music library, AudioVibes is your trusted companion for all your <strong>music download needs</strong>.
         </p>

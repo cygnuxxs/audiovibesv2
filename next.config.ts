@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
         hostname: "*",
       },
     ],
+    unoptimized : true,
     formats: ["image/avif", "image/webp"],
   },
   // Enable compression

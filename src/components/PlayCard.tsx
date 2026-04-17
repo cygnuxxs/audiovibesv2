@@ -9,7 +9,6 @@ import { PauseCircle, CirclePlay, Download } from 'lucide-react';
 import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
 import { Progress } from './ui/progress'; // Ensure this is imported
-import { incrementDownloads } from '@/lib/actions';
 
 // Helper to sanitize filename
 const sanitizeFilename = (filename: string): string => {
@@ -127,8 +126,6 @@ const PlayCard = ({ song }: { song: Song }) => {
         loadedFFmpeg.deleteFile(inputFileName);
         loadedFFmpeg.deleteFile(tempOutputFileName);
       } catch (e) { console.warn(e) }
-
-      startTransition(() => incrementDownloads());
       toast.success(`Downloaded: ${finalFileName}`);
 
     } catch (err) {

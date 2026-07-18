@@ -1,14 +1,15 @@
 import { flattenSongsData } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
-// Interface for simplified query parameters
+// 1. Force the route to be dynamic so Next.js doesn't cache the output
+export const dynamic = "force-dynamic";
+
 interface SearchQuery {
-  query?: string; // Search term (e.g., telugu)
-  type?: string; // Type of search (songs or albums)
-  page?: string; // Page number
+  query?: string;
+  type?: string;
+  page?: string;
 }
 
-// API route handler
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const params: SearchQuery = {
@@ -19,12 +20,8 @@ export async function GET(req: NextRequest) {
 
   const { query, type, page } = params;
 
-  // Validate query parameters
   if (!query) {
-    return NextResponse.json(
-      { error: "Missing query parameter" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing query parameter" }, { status: 400 });
   }
   if (!type || !["songs", "albums"].includes(type.toLowerCase())) {
     return NextResponse.json(
@@ -41,16 +38,13 @@ export async function GET(req: NextRequest) {
     api_version: "4",
     ctx: "web6dot0",
     n: "20",
-    __call:
-      type.toLowerCase() === "songs"
-        ? "search.getResults"
-        : "search.getAlbumResults",
+    __call: type.toLowerCase() === "songs" ? "search.getResults" : "search.getAlbumResults",
   };
 
   const externalApiUrl = `https://www.jiosaavn.com/api.php?p=${jioSaavnParams.p}&q=${jioSaavnParams.q}&_format=${jioSaavnParams._format}&_marker=${jioSaavnParams._marker}&api_version=${jioSaavnParams.api_version}&ctx=${jioSaavnParams.ctx}&n=${jioSaavnParams.n}&__call=${jioSaavnParams.__call}`;
 
   try {
-    // Fetch data from JioSaavn API with caching
+    // 2. Use cache: 'no-store' to ensure a fresh fetch every time
     const response = await fetch(externalApiUrl, {
       method: "GET",
       headers: {
@@ -59,35 +53,29 @@ export async function GET(req: NextRequest) {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
         Referer: "https://www.jiosaavn.com/",
       },
-      next: { 
-        revalidate: 3600 // Cache for 1 hour
-      },
+      cache: "no-store",
     });
 
     if (!response.ok) {
       return NextResponse.json(
-        {
-          error: "Failed to fetch data from external API",
-          message: response.statusText,
-        },
+        { error: "Failed to fetch data from external API", message: response.statusText },
         { status: response.status }
       );
     }
 
-    const data: SearchSong = await response.json();
+    const data = await response.json();
     const formattedData = flattenSongsData(data);
-    
-    // Return with cache headers
+
+    // 3. Set Cache-Control headers to prevent browser/proxy caching
     return NextResponse.json(formattedData, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
       },
     });
   } catch (error) {
     console.error("Error fetching from JioSaavn API:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "css:theme" : "tsx src/lib/cssToTheme.ts",
     "dev-https": "next dev --experimental-https",
     "lint": "eslint ."
   },
@@ -29,6 +30,7 @@
     "@toolwind/corner-shape": "0.0.8-3",
     "@vercel/analytics": "^2.0.0",
     "class-variance-authority": "^0.7.1",
+    "clipboardy": "^5.3.1",
     "clsx": "^2.1.1",
     "he": "^1.2.0",
     "lucide-react": "^0.577.0",
@@ -53,6 +55,7 @@
     "eslint-config-next": "16.1.6",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.1",
+    "tsx": "^4.23.0",
     "typescript": "^5.9.3"
   }
 }

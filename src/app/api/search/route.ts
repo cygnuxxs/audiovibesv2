@@ -55,6 +55,8 @@ export async function GET(req: NextRequest) {
       },
       cache: "no-store",
     });
+    console.log("Status code:", response.status)
+    console.log("Response headers :", Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
       return NextResponse.json(

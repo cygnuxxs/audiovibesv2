@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     _marker: "0",
     api_version: "4",
     ctx: "web6dot0",
-    n: "20",
+    n: "50",
     __call: type.toLowerCase() === "songs" ? "search.getResults" : "search.getAlbumResults",
   };
 

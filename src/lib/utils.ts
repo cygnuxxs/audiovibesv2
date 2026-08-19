@@ -1,12 +1,38 @@
 import { clsx, type ClassValue } from "clsx";
-import MP3Tag from "mp3tag.js";
-import { MP3TagAPICFrame } from "mp3tag.js/types/id3v2/frames";
 import internal from "stream";
 import { twMerge } from "tailwind-merge";
 import crypto from "node-forge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function sanitizeSongTitle(title: string): string {
+  return title
+    // Decode common HTML entities / encoded quotes
+    .replace(/&quot;|quot/gi, '"')
+    .replace(/&amp;/gi, "&")
+    .replace(/&apos;|&#39;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+
+    // Remove content inside brackets/parentheses
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/\{[^}]*\}/g, " ")
+
+    // Remove common music metadata descriptors
+    .replace(
+      /\b(official|official video|official audio|lyrics?|lyric video|audio|video|music video|visualizer|remastered|remaster|explicit|clean|version|edit|radio edit|extended|live|acoustic|instrumental|ost|original soundtrack|title track)\b/gi,
+      " "
+    )
+
+    // Keep Unicode letters/numbers and spaces
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+
+    // Normalize whitespace
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function formatViews(views: number) {
@@ -49,74 +75,6 @@ export function generateRandomId(length: number = 4): string {
   }
   return result;
 }
-
-export const addSongMetadata = async (buffer: ArrayBuffer, song: Song) => {
-  /* ---------- 1.  initialise mp3tag.js --------------------------- */
-  const mp3tag = new MP3Tag(buffer);
-  mp3tag.read();
-  if (mp3tag.error) throw new Error(`Metadata read error: ${mp3tag.error}`);
-
-  /* ---------- 2.  build standard & custom frames ---------------- */
-  const commFrame = {
-    descriptor: "Explicit Content",
-    text: song ? "Yes" : "No",
-    language: song.language,
-  };
-
-  const txxxFrames = [
-    { description: "ID", text: song.id },
-    { description: "PlayCount", text: song.play_count?.toString() || "" },
-  ];
-
-  /* ---------- 3.  optional album-art image (APIC) ---------------- */
-  let apicFrames: MP3TagAPICFrame[] | undefined;
-  const coverUrl = song.image.replace('50x50', '500x500');
-  if (coverUrl) {
-    try {
-      const res = await fetch(coverUrl, { mode: "cors" });
-      if (res.ok) {
-        const imgBuf = Array.from(new Uint8Array(await res.arrayBuffer()));
-        apicFrames = [
-          {
-            type: 3, // front cover
-            data: imgBuf,
-            description: "Album Art",
-            format: res.headers.get("Content-Type") || "image/jpeg",
-          },
-        ];
-      }
-    } catch (e) {
-      console.warn("Album-art fetch failed:", e);
-    }
-  }
-
-  /* ---------- 4.  ensure v2Details exists ------------------------ */
-  const existingV2 = mp3tag.tags;
-
-  /* ---------- 5.  assemble final tag object --------------------- */
-  mp3tag.tags.v2 = {
-    ...existingV2, // preserve any old frames
-    TIT2: song.title,
-    TPE1: song.artists?.map((a) => a.name).join(", "),
-    TALB: song.album as string,
-    TDRC: song.year?.toString() || "",
-    TDRL: song.year || "",
-    TLEN: song.duration ? `${parseInt(song.duration,10) * 1_000}` : "",
-    TPUB: song.label || "",
-    TCON: song.language,
-    TLAN: song.language,
-    COMM: [commFrame],
-    TXXX: txxxFrames,
-    ...(apicFrames ? { APIC: apicFrames } : {}),
-  };
-
-  /* ---------- 6.  save & return updated buffer ------------------ */
-  mp3tag.save(); // ID3v2.3
-  if (mp3tag.error) throw new Error(`Metadata save error: ${mp3tag.error}`);
-
-  const savedBuffer = new Uint8Array(mp3tag.buffer);
-  return savedBuffer;
-};
 
 export const downloadBlob = (blob: Blob, filename: string) => {
   const blobUrl = URL.createObjectURL(blob);
@@ -167,7 +125,7 @@ export const flattenSongsData = (data: any): Song[] =>
       image: (r.image as string).replace('150x150', '50x50'),
       language: r.language,
       year: r.year,
-      downloadUrl : createDownloadLink(info.encrypted_media_url as string),
+      downloadUrl: createDownloadLink(info.encrypted_media_url as string),
       play_count: r.play_count,
       explicit_content: r.explicit_content as boolean,
       music: info.music,

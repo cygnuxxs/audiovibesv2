@@ -8,6 +8,8 @@ declare module "*.scss" {
   export default classes;
 }
 
+
+
 interface SearchSong {
   total: number;
   start: number;
@@ -21,7 +23,7 @@ interface Song {
   image: string;
   language: string;
   year: string;
-  downloadUrl : string;
+  downloadUrl: string;
   play_count: number;
   music: string;
   album: string;
@@ -32,6 +34,8 @@ interface Song {
   album_url: string;
   duration: string;
   copyright_text: string;
+  release_date?: string;
+  explicit_content?: boolean;
   primary_artist_id?: string;
   primary_artist_name?: string;
   primary_artist_role?: string;

@@ -51,7 +51,7 @@ const PlayCard = ({ song }: { song: Song }) => {
          the progress bar to sit underneath if needed
       */}
       <>
-        <audio ref={audioRef} preload="metadata" crossOrigin="anonymous" />
+        <audio ref={audioRef} preload="metadata" />
         <div className="flex items-center p-1 shadow-lg border border-border rounded-full bg-card gap-2 w-fit">
           <Button
             size="sm"

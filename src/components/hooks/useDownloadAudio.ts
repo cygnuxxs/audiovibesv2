@@ -45,7 +45,7 @@ const useDownloadAudio = (song: Song) => {
       console.log(currentAudioUrl);
 
       const audioPromise = (async () => {
-        const response = await fetch(currentAudioUrl!, { mode: "cors" });
+        const response = await fetch(`/api/proxy-audio?url=${encodeURIComponent(currentAudioUrl!)}`);
         if (!response.ok) throw new Error(`Failed to fetch audio: ${response.status}`);
         if (!response.body) throw new Error("ReadableStream not supported in this browser.");
 
@@ -119,9 +119,7 @@ const useDownloadAudio = (song: Song) => {
             track_name: trackName,
             artist_name: artistName,
           });
-          const res = await fetch(`https://lrclib.net/api/search?${params}`, {
-            headers: { 'User-Agent': 'AudioVibes/1.0 (https://github.com/cygnuxxs)' },
-          });
+          const res = await fetch(`/api/proxy-lyrics?${params}`);
           console.log(res.url)
           if (res.ok) {
             const results: any[] = await res.json();
@@ -130,7 +128,7 @@ const useDownloadAudio = (song: Song) => {
             return match?.plainLyrics || undefined;
           }
         } catch (e) {
-          console.warn('LRCLIB lyrics fetch failed', e);
+          console.warn('Lyrics fetch failed', e);
         }
         return undefined;
       })();

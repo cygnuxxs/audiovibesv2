@@ -31,7 +31,7 @@ const SongCard: React.FC<{
           />
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg text-ellipsis font-black">
+          <h2 className="text-lg text-ellipsis line-clamp-2 font-black">
             {decode(song.title)}
           </h2>
           <div className="block space-y-2 border w-full border-none p-2">
@@ -57,7 +57,7 @@ const SongCard: React.FC<{
               <span className="pr-2">{song.primary_artist_name}</span>
             </Link>
             <p
-              className="text-xs text-card-foreground text-wrap font-bold rounded-full w-fit"
+              className="text-xs text-ellipsis line-clamp-1 text-card-foreground text-wrap font-bold rounded-full w-fit"
               aria-label={`Album: ${decode(song.album as string)}`}
             >
               {decode(song.album as string)}

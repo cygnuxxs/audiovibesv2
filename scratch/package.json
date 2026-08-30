@@ -1,0 +1,17 @@
+{
+  "name": "scratch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "mp4-tag": "^0.1.0-beta",
+    "mp4tree": "^0.10.4"
+  }
+}

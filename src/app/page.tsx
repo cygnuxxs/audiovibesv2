@@ -141,7 +141,7 @@ const HomePage = async ({
 
       <div className="w-dvw max-h-dvh flex bg-background items-center justify-center">
         <main
-          className="sm:px-4 sm:py-3 flex flex-col sm:rounded-4xl bg-card/30 border border-border shadow-xl max-w-6xl w-full max-sm:h-dvh sm:mt-4 max-sm:w-full sm:h-[calc(100vh-2rem)] overflow-hidden relative"
+          className="p-1 flex flex-col sm:rounded-4xl bg-card/30 border border-border shadow-xl max-w-6xl w-full max-sm:h-dvh sm:mt-2 max-sm:w-full sm:h-[calc(100vh-1rem)] overflow-hidden relative"
           style={{ contain: 'layout style paint' }}
         >
           <header className="flex items-center max-sm:p-1 justify-between pb-2 shrink-0" style={{ contain: 'layout' }}>
@@ -173,7 +173,7 @@ const HomePage = async ({
           </section>
 
           <section
-            className="overflow-auto max-sm:px-1 items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-2 min-h-0"
+            className="overflow-auto max-sm:px-1 items-start justify-center flex-1 w-full gap-2 flex flex-wrap mt-2 min-h-0 pb-20"
             aria-label={query ? `Search results for ${query}` : "Recommended songs"}
             style={{ contain: 'layout' }}
           >
@@ -183,15 +183,15 @@ const HomePage = async ({
           </section>
         </main>
         {!query && (
-            <footer hidden className="mt-4 h-0 overflow-auto pt-4 border-t border-border/40">
-              <div className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
-                 <SEOContent />
-                 <p className="mt-2">
-                   &copy; {new Date().getFullYear()} AudioVibes. Free Music Downloader.
-                 </p>
-              </div>
-            </footer>
-          )}
+          <footer hidden className="mt-4 h-0 overflow-auto pt-4 border-t border-border/40">
+            <div className="text-[10px] text-muted-foreground/60 text-center leading-relaxed">
+              <SEOContent />
+              <p className="mt-2">
+                &copy; {new Date().getFullYear()} AudioVibes. Free Music Downloader.
+              </p>
+            </div>
+          </footer>
+        )}
       </div>
     </>
   );

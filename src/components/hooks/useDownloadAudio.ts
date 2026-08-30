@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { decode } from 'he';
 import { toast } from 'sonner';
-import createWriter from '@/lib/writer/metadata-writer';
+import { writeMetadata, Metadata } from '@/lib/writer/mp4-writer';
 import { downloadBlob, sanitizeSongTitle } from '@/lib/utils';
 
 // Helper to sanitize filename
@@ -13,8 +13,9 @@ const sanitizeFilename = (filename: string): string => {
     .substring(0, 200);
 };
 
-const useDownloadAudio = (song: Song) => {
-  const { title, album } = song;
+const useDownloadAudio = (song: Song | null | undefined) => {
+  const title = song?.title || '';
+  const album = song?.album || '';
 
   // State for download management
   const [isProcessingDownload, setIsProcessingDownload] = useState(false);
@@ -32,14 +33,12 @@ const useDownloadAudio = (song: Song) => {
     try {
       // 1. Prepare URL
       if (!currentAudioUrl) {
-        currentAudioUrl = song.downloadUrl;
+        currentAudioUrl = song?.downloadUrl || null;
         setAudioSrcUrl(currentAudioUrl);
       }
       if (!currentAudioUrl) throw new Error("Audio URL is not available.");
 
-      // 2. Start Writer Initialization Early
-      const writerPromise = createWriter();
-
+      // 2. No writer initialization needed for pure TS
       // 3. Fetch with Progress Tracking & Parallel Artwork Fetch
       setDownloadStatus("Downloading...");
       console.log(currentAudioUrl);
@@ -80,7 +79,7 @@ const useDownloadAudio = (song: Song) => {
       })();
 
       const artworkPromise = (async () => {
-        const coverUrl = song.image?.replace('50x50', '500x500');
+        const coverUrl = song?.image?.replace('50x50', '500x500');
         if (!coverUrl) return undefined;
         try {
           // Fallback to direct fetch if proxy route was removed
@@ -112,6 +111,7 @@ const useDownloadAudio = (song: Song) => {
 
       const lyricsPromise = (async () => {
         try {
+          if (!song) return undefined;
           const trackName = sanitizeSongTitle(song.title);
           const artistName = sanitizeSongTitle(song.primary_artist_name || song.artists?.at(0)?.image || "");
 
@@ -133,7 +133,7 @@ const useDownloadAudio = (song: Song) => {
         return undefined;
       })();
 
-      const [allChunks, artworkBuffer, writer, lyrics] = await Promise.all([audioPromise, artworkPromise, writerPromise, lyricsPromise]);
+      const [allChunks, artworkBuffer, lyrics] = await Promise.all([audioPromise, artworkPromise, lyricsPromise]);
 
       // 4. Metadata & Download
       setDownloadStatus("Processing...");
@@ -144,37 +144,37 @@ const useDownloadAudio = (song: Song) => {
       const finalFileName = `${sanitizedTitle} - ${sanitizedAlbum}.m4a`;
 
       const metadata = {
-        title: decode(song.title || ''),
-        artist: song.artists?.map((a: any) => decode(a.name)).join(", ") || decode(song.primary_artist_name || ''),
-        album: decode((song.album as string) || ''),
-        albumArtist: decode(song.primary_artist_name || ''),
-        composer: decode(song.music || ''),
-        genre: song.language || "",
-        date: song.release_date || song.year?.toString() || "",
+        title: decode(song?.title || ''),
+        artist: song?.artists?.map((a: any) => decode(a.name)).join(", ") || decode(song?.primary_artist_name || ''),
+        album: decode((song?.album as string) || ''),
+        albumArtist: decode(song?.primary_artist_name || ''),
+        composer: decode(song?.music || ''),
+        genre: song?.language || "",
+        date: song?.release_date || song?.year?.toString() || "",
 
         track: 1,
         totalTracks: 1,
         disc: 1,
         totalDiscs: 1,
 
-        comment: song.subtitle ? decode(song.subtitle) : '',
-        copyright: decode(song.copyright_text || ""),
+        comment: song?.subtitle ? decode(song.subtitle) : '',
+        copyright: decode(song?.copyright_text || ""),
         encodingTool: "AudioVibes by Cygnuxxs",
-        description: song.subtitle ? decode(song.subtitle) : '',
+        description: song?.subtitle ? decode(song.subtitle) : '',
         lyrics: lyrics || '',
       };
 
-      const updatedBuffer = writer.writeMetadata(allChunks, metadata, artworkBuffer);
+      const updatedBuffer = await writeMetadata(allChunks, metadata as Metadata, artworkBuffer);
       const blob = new Blob([updatedBuffer.buffer as ArrayBuffer], { type: "audio/mp4" });
 
       downloadBlob(blob, finalFileName);
 
-      toast.success(`Downloaded: ${finalFileName}`);
+      toast.success(`Downloaded: ${finalFileName}`, { position: "top-center" });
 
     } catch (err) {
       console.error("Download error:", err);
       const msg = err instanceof Error ? err.message : "Unknown error";
-      toast.error(`Download failed: ${msg}`);
+      toast.error(`Download failed: ${msg}`, { position: "top-center" });
     } finally {
       setIsProcessingDownload(false);
       setDownloadProgress(0);

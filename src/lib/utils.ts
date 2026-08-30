@@ -89,8 +89,8 @@ export const downloadBlob = (blob: Blob, filename: string) => {
 
 export const createDownloadLink = (
   encryptedMediaUrl: string
-): string | null => {
-  if (!encryptedMediaUrl) return null;
+): string => {
+  if (!encryptedMediaUrl) return "";
 
   const maxQuality = { id: "_320", bitrate: "320kbps" };
   const key = "38346591";
@@ -113,35 +113,51 @@ export const createDownloadLink = (
   return maxBitrateUrl;
 };
 
-export const flattenSongsData = (data: any): Song[] =>
-  data.results.map((r: any) => {
-    const info = r.more_info ?? {};
-    const artistMap = info.artistMap ?? {};
+const mapRawSongToSong = (r: any): Song => {
+  const info = r.more_info ?? {};
+  const artistMap = info.artistMap ?? {};
 
-    return {
-      id: r.id,
-      title: r.title,
-      subtitle: r.subtitle,
-      image: (r.image as string).replace('150x150', '50x50'),
-      language: r.language,
-      year: r.year,
-      downloadUrl: createDownloadLink(info.encrypted_media_url as string),
-      play_count: r.play_count,
-      explicit_content: r.explicit_content as boolean,
-      music: info.music,
-      album: info.album,
-      label: info.label,
-      kbps_320: info["320kbps"],
-      encrypted_media_url: info.encrypted_media_url,
-      duration: parseInt(info.duration, 10),
-      copyright_text: info.copyright_text,
-      release_date: info.release_date,
-      primary_artist_id: artistMap.primary_artists?.[0]?.id,
-      primary_artist_name: artistMap.primary_artists?.[0]?.name,
-      primary_artist_role: artistMap.primary_artists?.[0]?.role,
-      primary_artist_image: artistMap.primary_artists?.[0]?.image,
-      primary_artist_type: artistMap.primary_artists?.[0]?.type,
-      primary_artist_perma_url: artistMap.primary_artists?.[0]?.perma_url,
-      artists: artistMap.artists,
-    };
-  });
+  return {
+    id: r.id,
+    title: r.title,
+    subtitle: r.subtitle,
+    image: (r.image as string).replace('150x150', '50x50'),
+    language: r.language,
+    year: r.year,
+    downloadUrl: createDownloadLink(info.encrypted_media_url as string),
+    play_count: r.play_count,
+    explicit_content: r.explicit_content as boolean,
+    music: info.music,
+    album: info.album,
+    label: info.label,
+    is320Kbps: info["320kbps"] === "true",
+    encrypted_media_url: info.encrypted_media_url,
+    encrypted_drm_media_url: info.encrypted_drm_media_url ?? "",
+    album_url: info.album_url ?? "",
+    duration: info.duration,
+    copyright_text: info.copyright_text,
+    release_date: info.release_date,
+    primary_artist_id: artistMap.primary_artists?.[0]?.id,
+    primary_artist_name: artistMap.primary_artists?.[0]?.name,
+    primary_artist_role: artistMap.primary_artists?.[0]?.role,
+    primary_artist_image: artistMap.primary_artists?.[0]?.image,
+    primary_artist_type: artistMap.primary_artists?.[0]?.type,
+    primary_artist_perma_url: artistMap.primary_artists?.[0]?.perma_url,
+    artists: artistMap.artists,
+  };
+};
+
+export const flattenSongsData = (data: any): Song[] =>
+  data.results.map((r: any) => mapRawSongToSong(r));
+
+/**
+ * Maps the suggestions API response into Song[].
+ *
+ * Response shape: { "0": { song: {...} }, "1": { song: {...} }, ..., "stationid": "..." }
+ * Numeric keys hold song entries; non-numeric keys (stationid) are skipped.
+ */
+export const flattenSuggestionsData = (data: any): Song[] =>
+  Object.keys(data)
+    .filter((key) => /^\d+$/.test(key))
+    .sort((a, b) => Number(a) - Number(b))
+    .map((key) => mapRawSongToSong(data[key].song));

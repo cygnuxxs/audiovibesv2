@@ -1,15 +1,15 @@
 'use client'
-import React, { useState, useMemo, useCallback, useTransition } from 'react'
+import React, { useMemo } from 'react'
 import { cn } from '@/lib/utils';
-import useAudioPlayer from './hooks/useAudioPlayer';
+import { usePlayer } from '@/lib/player';
 import useDownloadAudio from './hooks/useDownloadAudio';
-import { PauseCircle, CirclePlay, Download } from 'lucide-react';
+import { PauseCircle, CirclePlay, Download, ListPlus } from 'lucide-react';
 import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
-import { Progress } from './ui/progress'; // Ensure this is imported
+import { Progress } from './ui/progress';
 
 const PlayCard = ({ song }: { song: Song }) => {
-  const { id, title } = song;
+  const { id } = song;
 
   const {
     isProcessingDownload,
@@ -18,14 +18,16 @@ const PlayCard = ({ song }: { song: Song }) => {
     handleDownload,
   } = useDownloadAudio(song);
 
-  const { audioRef, isPlaying, isLoadingAudio, togglePlayback } = useAudioPlayer(id, title, song.downloadUrl);
-  const [isPending, startTransition] = useTransition();
+  const player = usePlayer();
 
-  const isBusy = isLoadingAudio || isProcessingDownload || isPending;
+  const isCurrentSong = player.currentSong?.id === id;
+  const isPlaying = isCurrentSong && player.isPlaying;
+  const isLoading = isCurrentSong && player.isLoadingSong;
 
-  // ... (PlayButtonContent remains the same)
+  const isBusy = isLoading || isProcessingDownload;
+
   const PlayButtonContent = useMemo(() => {
-    if (isLoadingAudio) {
+    if (isLoading) {
       return (
         <>
           <SmallSpinner />
@@ -43,19 +45,27 @@ const PlayCard = ({ song }: { song: Song }) => {
         <span>{isPlaying ? "Pause" : "Play"}</span>
       </>
     );
-  }, [isPlaying, isLoadingAudio]);
+  }, [isPlaying, isLoading]);
+
+  const handlePlayClick = () => {
+    if (isCurrentSong) {
+      player.togglePlayback();
+    } else {
+      player.play(song);
+    }
+  };
+
+  const handleAddToQueue = () => {
+    player.addToQueue(song);
+  };
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Wrapping the main controls in a div to allow
-         the progress bar to sit underneath if needed
-      */}
       <>
-        <audio ref={audioRef} preload="metadata" />
         <div className="flex items-center p-1 shadow-lg border border-border rounded-full bg-card gap-2 w-fit">
           <Button
             size="sm"
-            onClick={togglePlayback}
+            onClick={handlePlayClick}
             disabled={isBusy}
             className={cn("transition-colors rounded-full shadow-primary duration-200")}
           >
@@ -71,7 +81,6 @@ const PlayCard = ({ song }: { song: Song }) => {
           >
             {isProcessingDownload ? (
               <div className="flex items-center gap-2">
-                {/* Shows Spinner during processing, Percentage during download */}
                 {downloadStatus === "Processing..." ? (
                   <SmallSpinner />
                 ) : (
@@ -85,6 +94,17 @@ const PlayCard = ({ song }: { song: Song }) => {
                 <span>Download</span>
               </>
             )}
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={handleAddToQueue}
+            variant="ghost"
+            className="rounded-full px-2"
+            aria-label="Add to queue"
+            title="Add to queue"
+          >
+            <ListPlus className="w-4 h-4" />
           </Button>
         </div>
       </>

@@ -1,18 +1,19 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { Montserrat } from "next/font/google";
+import { Google_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import {Analytics} from '@vercel/analytics/next'
+import { Analytics } from '@vercel/analytics/next'
 import Script from "next/script";
 import { ActiveThemeProvider } from "@/components/active-theme";
+import { PlayerProvider } from "@/lib/player";
+import PlayerBar from "@/components/PlayerBar";
+import ChangelogModal from "@/components/ChangelogModal";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-  display: "swap",
-  preload: true,
-  fallback: ["system-ui", "arial"],
-});
+const sans = Google_Sans({
+  subsets: ['latin'],
+  variable: "--font-sans",
+  display: 'swap', preload: true
+})
 
 export const metadata = {
   metadataBase: new URL("https://audiovibes.vercel.app"),
@@ -246,11 +247,15 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${montserrat.className} theme-container antialiased`}>
+      <body className={`${sans.className} theme-container antialiased`}>
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ActiveThemeProvider>
-            {children}
+            <PlayerProvider>
+              {children}
+              <PlayerBar />
+              <ChangelogModal />
+            </PlayerProvider>
             <Toaster />
           </ActiveThemeProvider>
         </ThemeProvider>

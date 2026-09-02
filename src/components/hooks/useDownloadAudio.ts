@@ -3,6 +3,7 @@ import { decode } from 'he';
 import { toast } from 'sonner';
 import { writeMetadata, Metadata } from '@/lib/writer/mp4-writer';
 import { downloadBlob, sanitizeSongTitle } from '@/lib/utils';
+import type { Song } from '@/lib/schemas';
 
 // Helper to sanitize filename
 const sanitizeFilename = (filename: string): string => {

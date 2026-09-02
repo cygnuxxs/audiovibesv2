@@ -7,6 +7,7 @@ import { PauseCircle, CirclePlay, Download, ListPlus } from 'lucide-react';
 import { Button } from './ui/button';
 import SmallSpinner from './ui/loading/small-spinner';
 import { Progress } from './ui/progress';
+import type { Song } from '@/lib/schemas';
 
 const PlayCard = ({ song }: { song: Song }) => {
   const { id } = song;

@@ -1,7 +1,12 @@
 import { clsx, type ClassValue } from "clsx";
-import internal from "stream";
 import { twMerge } from "tailwind-merge";
 import crypto from "node-forge";
+import {
+  RawSearchResponseSchema,
+  RawSuggestionEntrySchema,
+  type Song,
+  type RawSong,
+} from "./schemas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -41,14 +46,6 @@ export function formatViews(views: number) {
   if (views >= 1e5 && views < 1e7) return (views / 1e5).toFixed(1) + "L";
   if (views >= 1e7 && views < 1e10) return (views / 1e6).toFixed(1) + "M";
   return (views / 1e7).toFixed(1) + "Cr";
-}
-
-export async function readableToBlob(readable: internal.Readable) {
-  const chunks = [];
-  for await (const chunk of readable) {
-    chunks.push(chunk);
-  }
-  return new Blob(chunks);
 }
 
 export const formatDuration = (
@@ -113,51 +110,74 @@ export const createDownloadLink = (
   return maxBitrateUrl;
 };
 
-const mapRawSongToSong = (r: any): Song => {
-  const info = r.more_info ?? {};
-  const artistMap = info.artistMap ?? {};
+// ─── Raw JioSaavn → Domain Mappers (with Zod validation) ────────────────────
+
+export const mapRawSongToSong = (raw: RawSong): Song => {
+  const info = raw.more_info;
+  const artistMap = info?.artistMap;
 
   return {
-    id: r.id,
-    title: r.title,
-    subtitle: r.subtitle,
-    image: (r.image as string).replace('150x150', '50x50'),
-    language: r.language,
-    year: r.year,
-    downloadUrl: createDownloadLink(info.encrypted_media_url as string),
-    play_count: r.play_count,
-    explicit_content: r.explicit_content as boolean,
-    music: info.music,
-    album: info.album,
-    label: info.label,
-    is320Kbps: info["320kbps"] === "true",
-    encrypted_media_url: info.encrypted_media_url,
-    encrypted_drm_media_url: info.encrypted_drm_media_url ?? "",
-    album_url: info.album_url ?? "",
-    duration: info.duration,
-    copyright_text: info.copyright_text,
-    release_date: info.release_date,
-    primary_artist_id: artistMap.primary_artists?.[0]?.id,
-    primary_artist_name: artistMap.primary_artists?.[0]?.name,
-    primary_artist_role: artistMap.primary_artists?.[0]?.role,
-    primary_artist_image: artistMap.primary_artists?.[0]?.image,
-    primary_artist_type: artistMap.primary_artists?.[0]?.type,
-    primary_artist_perma_url: artistMap.primary_artists?.[0]?.perma_url,
-    artists: artistMap.artists,
+    id: raw.id,
+    title: raw.title,
+    subtitle: raw.subtitle ?? "",
+    image: (raw.image as string).replace("150x150", "50x50"),
+    language: raw.language ?? "",
+    year: raw.year ?? "",
+    downloadUrl: createDownloadLink(info?.encrypted_media_url ?? ""),
+    play_count: raw.play_count ?? 0,
+    explicit_content:
+      typeof raw.explicit_content === "boolean"
+        ? raw.explicit_content
+        : undefined,
+    music: info?.music ?? "",
+    album: info?.album ?? "",
+    label: info?.label ?? "",
+    is320Kbps: info?.["320kbps"] === "true",
+    encrypted_media_url: info?.encrypted_media_url ?? "",
+    encrypted_drm_media_url: info?.encrypted_drm_media_url ?? "",
+    album_url: info?.album_url ?? "",
+    duration: info?.duration ?? "0",
+    copyright_text: info?.copyright_text ?? "",
+    release_date: info?.release_date ?? undefined,
+    primary_artist_id: artistMap?.primary_artists?.[0]?.id,
+    primary_artist_name: artistMap?.primary_artists?.[0]?.name,
+    primary_artist_role: artistMap?.primary_artists?.[0]?.role ?? undefined,
+    primary_artist_image: artistMap?.primary_artists?.[0]?.image ?? undefined,
+    primary_artist_type: artistMap?.primary_artists?.[0]?.type ?? undefined,
+    primary_artist_perma_url: artistMap?.primary_artists?.[0]?.perma_url ?? undefined,
+    artists: artistMap?.artists?.map((a) => ({
+      id: a.id,
+      name: a.name,
+      role: a.role ?? "",
+      image: a.image ?? "",
+      type: a.type ?? "",
+      perma_url: a.perma_url ?? undefined,
+    })),
   };
 };
 
-export const flattenSongsData = (data: any): Song[] =>
-  data.results.map((r: any) => mapRawSongToSong(r));
+/**
+ * Validates and transforms raw JioSaavn search response into Song[].
+ * Throws ZodError if upstream shape is unexpected.
+ */
+export const flattenSongsData = (data: unknown): Song[] => {
+  const parsed = RawSearchResponseSchema.parse(data);
+  return parsed.results.map(mapRawSongToSong);
+};
 
 /**
- * Maps the suggestions API response into Song[].
+ * Validates and transforms raw JioSaavn suggestions response into Song[].
  *
  * Response shape: { "0": { song: {...} }, "1": { song: {...} }, ..., "stationid": "..." }
  * Numeric keys hold song entries; non-numeric keys (stationid) are skipped.
  */
-export const flattenSuggestionsData = (data: any): Song[] =>
-  Object.keys(data)
+export const flattenSuggestionsData = (data: unknown): Song[] => {
+  const record = data as Record<string, unknown>;
+  return Object.keys(record)
     .filter((key) => /^\d+$/.test(key))
     .sort((a, b) => Number(a) - Number(b))
-    .map((key) => mapRawSongToSong(data[key].song));
+    .flatMap((key) => {
+      const entry = RawSuggestionEntrySchema.safeParse(record[key]);
+      return entry.success ? [mapRawSongToSong(entry.data.song)] : [];
+    });
+};

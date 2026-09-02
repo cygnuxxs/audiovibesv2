@@ -11,6 +11,8 @@ import React, {
 } from 'react';
 import { decode } from 'he';
 import { toast } from 'sonner';
+import { z } from 'zod/v4';
+import { SongSchema, type Song } from './schemas';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -253,7 +255,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       try {
         const response = await fetch(`/api/suggestions?id=${encodeURIComponent(songId)}&limit=20`);
         if (!response.ok) return;
-        const suggestions: Song[] = await response.json();
+        const raw = await response.json();
+        const suggestions = z.array(SongSchema).parse(raw);
         if (suggestions.length > 0) {
           setQueue((prev) => {
             // Avoid duplicates

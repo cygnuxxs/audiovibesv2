@@ -5,6 +5,7 @@ import React, { memo } from "react";
 import { formatDuration, formatViews } from "@/lib/utils";
 import { decode } from "he";
 import PlayCard from "./PlayCard";
+import type { Song } from "@/lib/schemas";
 
 const SongCard: React.FC<{
   song: Song;

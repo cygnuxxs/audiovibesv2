@@ -1,6 +1,8 @@
 import { ProxyUrlQuerySchema } from "@/lib/schemas";
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET(req: NextRequest) {
   const result = ProxyUrlQuerySchema.safeParse({
     url: req.nextUrl.searchParams.get("url") ?? undefined,

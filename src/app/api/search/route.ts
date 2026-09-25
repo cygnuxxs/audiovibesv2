@@ -3,6 +3,7 @@ import { SearchQuerySchema } from "@/lib/schemas";
 import { NextRequest, NextResponse } from "next/server";
 import { getSearchParams, HEADERS, JIOSAAVN_API } from "../endpoints";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
@@ -45,9 +46,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(formattedData, {
       headers: {
         "Cache-Control":
-          "no-store, no-cache, must-revalidate, proxy-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
+          "public, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {

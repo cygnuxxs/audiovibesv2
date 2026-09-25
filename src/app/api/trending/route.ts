@@ -6,6 +6,7 @@ import { interleaveFeedSongs } from "../endpoints";
 import type { Song } from "@/lib/schemas";
 import { z } from "zod/v4";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 async function fetchLanguage(language: string): Promise<Song[]> {
@@ -56,9 +57,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(songs, {
             headers: {
                 "Cache-Control":
-                    "no-store, no-cache, must-revalidate, proxy-revalidate",
-                Pragma: "no-cache",
-                Expires: "0",
+                    "public, s-maxage=3600, stale-while-revalidate=86400",
             },
         });
     } catch (error) {

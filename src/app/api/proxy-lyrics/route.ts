@@ -2,6 +2,8 @@ import { LyricsQuerySchema, LyricsResultSchema } from "@/lib/schemas";
 import { z } from "zod/v4";
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 export async function GET(req: NextRequest) {
   const result = LyricsQuerySchema.safeParse({
     track_name: req.nextUrl.searchParams.get("track_name") ?? undefined,

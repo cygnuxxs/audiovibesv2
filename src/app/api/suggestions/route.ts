@@ -11,6 +11,7 @@ import {
   JIOSAAVN_API,
 } from "../endpoints";
 
+export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 async function createStation(songId: string): Promise<string> {
@@ -79,9 +80,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(songsData, {
       headers: {
         "Cache-Control":
-          "no-store, no-cache, must-revalidate, proxy-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
+          "public, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {

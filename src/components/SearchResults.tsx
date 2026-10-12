@@ -1,6 +1,7 @@
-import {use} from 'react';
+import { use } from 'react';
 import SongCard from './SongCard';
 import { searchSongs } from "@/lib/actions";
+import React from 'react';
 
 export const revalidate = 3600;
 
@@ -17,11 +18,12 @@ const SearchResults = ({ query }: { query?: string }) => {
   return (
     <>
       {songs.map((song, index) => (
-        <SongCard
-          song={song}
-          key={song.id}
-          priority={index < 3} // Prioritize first 3 images (above the fold)
-        />
+        <React.Fragment key={song.id}>
+          <SongCard
+            song={song}
+            priority={index < 3} // Prioritize first 3 images (above the fold)
+          />
+        </React.Fragment>
       ))}
     </>
   );

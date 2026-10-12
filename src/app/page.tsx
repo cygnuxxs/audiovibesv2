@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Music2 } from "lucide-react";
 import SEOContent from "@/components/SEOContent";
 export const revalidate = 3600;
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export const viewport: Viewport = {
   themeColor: [

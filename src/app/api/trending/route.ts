@@ -6,7 +6,7 @@ import { interleaveFeedSongs } from "../endpoints";
 import type { Song } from "@/lib/schemas";
 import { z } from "zod/v4";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 async function fetchLanguage(language: string): Promise<Song[]> {

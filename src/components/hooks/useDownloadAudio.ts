@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { decode } from 'he';
 import { toast } from 'sonner';
 import { writeMetadata, Metadata } from '@/lib/writer/mp4-writer';
-import { downloadBlob, sanitizeSongTitle } from '@/lib/utils';
+import { downloadBlob, sanitizeSongTitle } from '@/lib/client-utils';
 import type { Song } from '@/lib/schemas';
 
 // Helper to sanitize filename

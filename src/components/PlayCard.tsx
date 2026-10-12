@@ -1,6 +1,6 @@
 'use client'
 import React, { useMemo } from 'react'
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/client-utils';
 import { usePlayer } from '@/lib/player';
 import useDownloadAudio from './hooks/useDownloadAudio';
 import { PauseCircle, CirclePlay, Download, ListPlus } from 'lucide-react';

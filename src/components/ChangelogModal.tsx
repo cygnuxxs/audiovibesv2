@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download, Sparkles, ListMusic, Keyboard, X } from "lucide-react";
 import { useIsMobile } from "@/components/hooks/useMobile";
-import { cn } from "@/lib/utils"; // remove this import if you don't have a `cn` helper
+import { cn } from "@/lib/client-utils";
 
 const VERSION_KEY = "audiovibes_changelog_v2_1";
 const VERSION_LABEL = "v2.1";

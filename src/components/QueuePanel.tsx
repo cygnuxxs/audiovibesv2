@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { decode } from 'he';
 import { usePlayer } from '@/lib/player';
 import { X, Trash2, Play, Pause } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/client-utils';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/components/hooks/useMobile'
 import {
@@ -158,14 +159,32 @@ export default function QueuePanel() {
         </div>
 
         {/* Keyboard hint footer */}
-        <div className="hidden sm:flex items-center justify-center py-2.5 border-t border-border shrink-0">
-          <span className="text-[10px] text-muted-foreground">
-            Press{' '}
-            <kbd className="px-1 py-0.5 bg-muted rounded text-[9px] font-mono border border-border">
-              Q
-            </kbd>{' '}
-            to toggle
-          </span>
+        <div className="flex flex-col border-t border-border shrink-0 bg-muted/30">
+          <Link
+            href="/contribute"
+            className="flex items-center justify-between p-3 hover:bg-muted transition-colors group"
+          >
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-semibold group-hover:text-primary transition-colors">
+                Support AudioVibes
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                Buy us a coffee
+              </span>
+            </div>
+            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+              Contribute
+            </span>
+          </Link>
+          <div className="hidden sm:flex items-center justify-center py-2 border-t border-border">
+            <span className="text-[10px] text-muted-foreground">
+              Press{' '}
+              <kbd className="px-1 py-0.5 bg-muted rounded text-[9px] font-mono border border-border">
+                Q
+              </kbd>{' '}
+              to toggle
+            </span>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

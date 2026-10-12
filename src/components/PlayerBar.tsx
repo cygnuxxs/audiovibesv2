@@ -19,8 +19,10 @@ import {
   Loader2,
   ChevronDown,
   Download,
+  Coffee,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/client-utils';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import {
@@ -195,7 +197,7 @@ function MobileExpandedPlayer({
   const highResImage = currentSong.image.replace('50x50', '500x500');
 
   return (
-    <div className="fixed inset-0 z-[60] bg-background flex flex-col animate-in slide-in-from-bottom duration-300">
+    <div className="fixed inset-0 z-60 bg-background flex flex-col animate-in slide-in-from-bottom duration-300">
       {/* Header */}
       <div className="flex items-center justify-between p-4 shrink-0">
         <Button
@@ -548,6 +550,16 @@ export default function PlayerBar() {
             >
               <ListMusic className="size-4" />
             </PlayerButton>
+
+            <Link href="/contribute">
+              <PlayerButton
+                onClick={() => { }}
+                label="Buy us a coffee"
+                className="hidden sm:flex size-8 text-muted-foreground"
+              >
+                <Coffee className="size-4" />
+              </PlayerButton>
+            </Link>
           </div>
         </div>
       </div>

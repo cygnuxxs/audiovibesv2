@@ -11,7 +11,7 @@ import {
   JIOSAAVN_API,
 } from "../endpoints";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 async function createStation(songId: string): Promise<string> {

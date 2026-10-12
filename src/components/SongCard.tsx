@@ -2,7 +2,7 @@ import { Clock, Disc, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { memo } from "react";
-import { formatDuration, formatViews } from "@/lib/utils";
+import { formatDuration, formatViews } from "@/lib/client-utils";
 import { decode } from "he";
 import PlayCard from "./PlayCard";
 import type { Song } from "@/lib/schemas";

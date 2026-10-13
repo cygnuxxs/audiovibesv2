@@ -58,6 +58,12 @@ async function fetchSuggestions(
   return response.json();
 }
 
+function getSuggestionEntryCount(data: unknown): number {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return 0;
+
+  return Object.keys(data).filter((key) => /^\d+$/.test(key)).length;
+}
+
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
 
@@ -77,10 +83,27 @@ export async function GET(req: NextRequest) {
     const stationId = await createStation(id);
     const rawData = await fetchSuggestions(stationId, limit);
     const songsData = flattenSuggestionsData(rawData);
+
+    const upstreamEntryCount = getSuggestionEntryCount(rawData);
+    if (upstreamEntryCount > 0 && songsData.length === 0) {
+      console.error("JioSaavn suggestions contained no parseable songs", {
+        songId: id,
+        stationId,
+        upstreamEntryCount,
+        responseKeys:
+          rawData && typeof rawData === "object" && !Array.isArray(rawData)
+            ? Object.keys(rawData)
+            : typeof rawData,
+      });
+      return NextResponse.json(
+        { error: "JioSaavn returned an unsupported suggestions response" },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json(songsData, {
       headers: {
-        "Cache-Control":
-          "public, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {
